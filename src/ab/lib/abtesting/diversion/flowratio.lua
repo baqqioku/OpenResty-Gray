@@ -80,16 +80,24 @@ _M.getUpstream = function(self, ratio)
     local policyLib = self.policyLib
     ngx.log(ngx.DEBUG,'调用了getUpstream方法, policyLib:',policyLib)
     local upstream, err = database:hget(policyLib , ratio)
-    local hkeys = database:hkyes(policy);
-
-    if not upstream then
-        if hkeys then
-
+    local hkeys,err = database:hkeys(policyLib);
+    ngx.log(ngx.DEBUG,upstream)
+    if  upstream == ngx.null or upstream == nil then
+        for i=1,#hkeys do
+            ngx.log(ngx.DEBUG,hkeys[i])
+            if ratio <= tonumber(hkeys[i]) then
+                local tempUpSteam,err = database:hget(policyLib,hkeys[i]);
+                ngx.log(ngx.DEBUG,tempUpSteam)
+                if tempUpSteam then
+                    return tempUpSteam;
+                end
+                break;
+                --error{ERRORINFO.REDIS_ERROR, err}
+            end
         end
-        error{ERRORINFO.REDIS_ERROR, err}
-
     end
-    --<= flowTatio
+
+    --error{ERRORINFO.REDIS_ERROR, err}
     if upstream == ngx.null then
         return nil
     else
