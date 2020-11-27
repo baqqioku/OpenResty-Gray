@@ -84,7 +84,6 @@ mkdir  luacode
             include upstream.conf;
             include default.conf;
             include vhost.conf;
-            include "s2.conf";
      }
 
 ````
