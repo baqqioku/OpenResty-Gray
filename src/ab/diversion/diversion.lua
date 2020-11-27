@@ -11,6 +11,10 @@ local cjson         = require('cjson.safe')
 local semaphore     = require("abtesting.utils.sema")
 local grayServerModule = require('abtesting.adapter.grayserver')
 
+local globleConfig = require('config.appConf')
+local divEnable = globleConfig.global_configs.divEnable
+
+
 
 local dolog         = utils.dolog	
 local doerror       = utils.doerror
@@ -135,10 +139,13 @@ local loadGrayServer = function()
 
     --step 1: read frome cache, but error
     local graySwitch = grayServerCache:getGrayServer(grayServerName)
+    ngx.log(ngx.DEBUG,grayServerName,'-----',graySwitch)
     if not graySwitch then
         -- continue, then fetch from db
     elseif graySwitch == 'off' then
         return false, graySwitch,'grayServer not config , div switch off'
+    else
+        return true,graySwitch
     end
 
     --step 2: acquire the lock
@@ -150,7 +157,6 @@ local loadGrayServer = function()
 
     -- setp 3: read from cache again
     local graySwitch = grayServerCache:getGrayServer(grayServerName)
-    ngx.log(ngx.DEBUG,grayServerName,'--',graySwitch)
 
     if not graySwitch then
         -- continue, then fetch from db
@@ -158,6 +164,8 @@ local loadGrayServer = function()
         -- graySwitch = 0, div switch off, goto default upstream
         if sem then sema:post(1) end
         return false, graySwitch,'graySwitch == off, div switch off'
+    else
+        return true,graySwitch
     end
 
     -- step 4: fetch from redis
@@ -191,6 +199,10 @@ end
 
 -- getRuntimeInfo from cache or db
 local pfunc = function()
+    ngx.log(ngx.DEBUG, divEnable)
+    if not divEnable then
+        return false,-1,nil
+    end
 
     local ok,status, graySwitch = xpcall(loadGrayServer,handler)
     ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
@@ -278,7 +290,7 @@ end
 
 
 local ok, status, steps, runtimeInfo = xpcall(pfunc, handler)
-ngx.log(ngx.DEBUG," ",ok," ",status," ",steps)
+--ngx.log(ngx.DEBUG," ",ok," ",status," ",steps)
 if not ok then
     -- execute error, the type of status is table now
     log:errlog("getruntime\t", "error\t")

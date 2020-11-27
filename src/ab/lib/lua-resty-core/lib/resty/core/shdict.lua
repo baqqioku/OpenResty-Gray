@@ -190,7 +190,6 @@ end
 
 local function shdict_store(zone, op, key, value, exptime, flags)
     zone = check_zone(zone)
-
     if not exptime then
         exptime = 0
     elseif exptime < 0 then
