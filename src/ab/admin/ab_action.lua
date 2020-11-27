@@ -8,6 +8,10 @@ local ERRORINFO     = require('abtesting.error.errcode').info
 local policy        = require("admin.policy")
 local runtime       = require('admin.runtime')
 local policygroup   = require("admin.policygroup")
+local grayserver    = require("admin.grayserver")
+
+
+local cache         = require('abtesting.utils.cache')
 
 local cjson         = require('cjson.safe')
 local doresp        = utils.doresp
@@ -38,6 +42,10 @@ ab_action.policygroup_set    = policygroup.set
 ab_action.policygroup_get    = policygroup.get
 ab_action.policygroup_del    = policygroup.del
 
+ab_action.grayserver_set     = grayserver.set
+ab_action.grayserver_check   = grayserver.check
+ab_action.grayserver_del     = grayserver.del
+ab_action.grayserver_load    = grayserver.loadInit
 
 local get_uriargs_error = function()
     local info = ERRORINFO.ACTION_BLANK_ERROR
@@ -75,9 +83,11 @@ if not ok then
     return
 end
 
+
 local args = ngx.req.get_uri_args()
 if args then
     local action = args.action
+    ngx.log(ngx.DEBUG,action)
     local do_action = ab_action[action]
     if do_action then
         do_action({['db']=red})
@@ -85,9 +95,15 @@ if args then
 --        if not ok then
 --            do_action_error()
 --        end
+
+        --loadGrayServer({['db']=red})
+
     else
         do_action_error(action)
     end
 else
     get_uriargs_error()
 end
+
+
+

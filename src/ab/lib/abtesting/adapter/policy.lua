@@ -69,6 +69,7 @@ end
 -- @return allways returned SUCCESS
 _M._setDivdata = function(self, id, divdata, modulename)
     local divModule = require(modulename)
+    ngx.log(ngx.DEBUG,'modulename:',modulename)
     local database = self.database
     local key = table.concat({self.baseLibrary, id, fields.divdata}, separator)
     

@@ -4,7 +4,7 @@ local _M = {}
 _M._VERSION = '0.0.1'
 
 _M.redisConf = {
-    ["uds"]      = ngx.var.redis_uds   ,
+    ["uds"]      = ngx.var.redis_uds,
     ["host"]     = ngx.var.redis_host,
     ["port"]     = ngx.var.redis_port,
     ["poolsize"] = ngx.var.redis_pool_size,
@@ -13,6 +13,17 @@ _M.redisConf = {
     ["dbid"]     = ngx.var.redis_dbid,
     ["auth"]     = ngx.var.redis_auth
 }
+
+--[[_M.redisConf = {
+    ["uds"]      = '/var/run/redis.sock',
+    ["host"]     = '192.168.126.130',
+    ["port"]     = '6379',
+    ["poolsize"] = 10000,
+    ["idletime"] = 90000 ,
+    ["timeout"]  = 10000,
+    ["dbid"]     = 0,
+    ["auth"]     = '123'
+}]]
 
 _M.divtypes = {
     ["iprange"]     = 'ipParser',  
@@ -31,13 +42,14 @@ _M.prefixConf = {
     ["policyLibPrefix"]     = 'ab:policies',
     ["policyGroupPrefix"]   = 'ab:policygroups',
     ["runtimeInfoPrefix"]   = 'ab:runtimeInfo',
-    ["domainname"]          = ngx.var.domain_name,
+    ["graySwitchPrefix"]    = 'ab:grayserver',
+    ["domainname"]          = ngx.var.domain_name
 }
 
 _M.divConf = {
     ["default_backend"]     = ngx.var.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = ngx.var.shdict_expire or 60,
+    ["shdict_expire"]       = ngx.var.shdict_expire or 60
 }
 
 _M.cacheConf = {
@@ -67,8 +79,10 @@ _M.loglv = {
     ['err']					= ngx.ERR, 
 	['info']				= ngx.INFO,
     ['warn']				= ngx.WARN,
-    ['debug']				= ngx.DEBUG,           
+    ['debug']				= ngx.DEBUG
 }
+
+
 
 
 

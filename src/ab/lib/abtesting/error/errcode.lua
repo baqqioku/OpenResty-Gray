@@ -42,6 +42,10 @@ _M.info = {
     ['ACTION_BLANK_ERROR']	    = { 50406, 'no action fetched from '},
 
     ['DOACTION_ERROR']	        = { 50501, 'error during action of '},
+
+    ['GRAYSERVER_INVALID_ERROR'] = { 50701, 'gray server invalid for '},
+
+    ['GRAYSERVER_INPUT_ERROR']	 = { 50702, 'gray server input error for '},
     
     --  unknown reason
     ['UNKNOWN_ERROR']		    = { 50601, 'unknown reason '},

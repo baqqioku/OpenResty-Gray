@@ -3,12 +3,41 @@
 --- Created by guoguo.
 --- DateTime: 2020/11/12 18:03
 ---
+local utils         = require('abtesting.utils.utils')
+local log			= require('abtesting.utils.log')
+local ERRORINFO     = require('abtesting.error.errcode').info
+
+local cjson         = require('cjson.safe')
+local doresp        = utils.doresp
+local dolog         = utils.dolog
 
 local _M = {
     _VERSION = '0.01'
 }
 
 _M.get = function()
+--[[    local request_body  = ngx.var.request_body
+    local postData      = cjson.decode(request_body)
+    if not request_body then
+        -- ERRORCODE.PARAMETER_NONE
+        local errinfo   = ERRORINFO.PARAMETER_NONE
+        local desc      = 'request_body or post data'
+        local response  = doresp(errinfo, desc)
+        log:errlog(dolog(errinfo, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    if not postData then
+        -- ERRORCODE.PARAMETER_ERROR
+        local errinfo   = ERRORINFO.PARAMETER_ERROR
+        local desc      = 'postData is not a json string'
+        local response  = doresp(errinfo, desc)
+        log:errlog(dolog(errinfo, desc))
+        ngx.say(response)
+        return nil
+    end
+    return postData['token']]
     return ngx.req.get_headers()["X-Token"]
 end
 return _M

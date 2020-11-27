@@ -4,7 +4,7 @@ local _M = {
 }
 
 _M.get = function()
-	local u = ngx.req.get_headers()["X-CityCode"]
+	local u = ngx.req.get_headers()["X-City"]
 	return u
 end
 return _M

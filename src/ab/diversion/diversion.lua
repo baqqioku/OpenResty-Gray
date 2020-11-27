@@ -1,4 +1,5 @@
 local runtimeModule = require('abtesting.adapter.runtimegroup')
+local grayServer    = require('admin.grayserver')
 local redisModule   = require('abtesting.utils.redis')
 local systemConf    = require('abtesting.utils.init')
 local utils         = require('abtesting.utils.utils')
@@ -8,6 +9,8 @@ local handler	    = require('abtesting.error.handler').handler
 local ERRORINFO	    = require('abtesting.error.errcode').info
 local cjson         = require('cjson.safe')
 local semaphore     = require("abtesting.utils.sema")
+local grayServerModule = require('abtesting.adapter.grayserver')
+
 
 local dolog         = utils.dolog	
 local doerror       = utils.doerror
@@ -23,22 +26,13 @@ local sema          = semaphore.sema
 local upsSema       = semaphore.upsSema
 
 local upstream      = nil
-local flowRatiostrategyCache = ngx.shared.api_flow_ratio_strategy
 
-
-
+local grayServerPrefix = systemConf.prefixConf.graySwitchPrefix
 
 
 local getRewriteInfo = function()
     return redirectInfo..ngx.var.backend
 end
-
-local getGraySwitch = function()
-    local isGray = ngx.var.gray
-    ngx.log(ngx.DEBUG,"灰度开关:",isGray)
-    return isGray
-end
-
 
 local doredirect = function(info)
     local ok  = ERRORINFO.SUCCESS
@@ -124,11 +118,101 @@ local log = logmod:new(hostname)
 
 local red = redisModule:new(redisConf)
 
+-- loadGrayServer from cache or connectdb
+local loadGrayServer = function()
+
+    local grayServerCache  = cache:new(ngx.var.kv_gray)
+    local url = ngx.var.uri;
+    local urls = utils.split(url,"/")
+    local length = #urls
+    local grayServerName
+    if length>1 then
+        for  i=1,#urls do
+            grayServerName = urls[2]
+            break
+        end
+    end
+
+    --step 1: read frome cache, but error
+    local graySwitch = grayServerCache:getGrayServer(grayServerName)
+    if not graySwitch then
+        -- continue, then fetch from db
+    elseif graySwitch == 'off' then
+        return false, graySwitch,'grayServer not config , div switch off'
+    end
+
+    --step 2: acquire the lock
+    local sem, err = sema:wait(0.01)
+    if not sem then
+        -- lock failed acquired
+        -- but go on. This action just sets a fence
+    end
+
+    -- setp 3: read from cache again
+    local graySwitch = grayServerCache:getGrayServer(grayServerName)
+    ngx.log(ngx.DEBUG,grayServerName,'--',graySwitch)
+
+    if not graySwitch then
+        -- continue, then fetch from db
+    elseif graySwitch == 'off' then
+        -- graySwitch = 0, div switch off, goto default upstream
+        if sem then sema:post(1) end
+        return false, graySwitch,'graySwitch == off, div switch off'
+    end
+
+    -- step 4: fetch from redis
+    local ok, db = connectdb(red, redisConf)
+    if not ok then
+        if sem then sema:post(1) end
+        return ok, db
+    end
+
+    local grayMod = grayServerModule:new(db.redis, grayServerPrefix)
+    local grayServer = grayMod:get(grayServerName)
+    local graySwitch = 'off'
+    if  not grayServer.name and not grayServer.switch then
+        log:debug('fetch grayserver [', grayServerName, '] from redis db, get [nil]')
+        grayServerCache:setGrayServerSwitch(grayServerName,graySwitch)
+        return false,graySwitch
+    else
+        graySwitch = grayServer.switch
+        grayServerCache:setGrayServerSwitch(grayServerName,graySwitch)
+        if graySwitch == 'off' then
+            return false, graySwitch
+        end
+    end
+    ngx.log(ngx.DEBUG,"最后一步 ",grayServerName,"  ",graySwitch)
+
+    if red then setKeepalive(red) end
+
+    if sem then sema:post(1) end
+    return true, graySwitch
+end
+
 -- getRuntimeInfo from cache or db
 local pfunc = function()
 
-    local runtimeCache  = cache:new(ngx.var.sysConfig)
+    local ok,status, graySwitch = xpcall(loadGrayServer,handler)
+    ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
+    if not ok then
+        -- execute error, the type of status is table now
+        log:errlog("get Gray Server\t", "error\t")
+        return doerror(status, getRewriteInfo())
+    else
+        local info = 'get Gray Server error: '
+        if  not status and graySwitch == 'off' then
+           info = info .. 'graySwitch = off , div switch OFF'
+            log:info(doredirect(info))
+            return false,-1,nil
+        end
+    end
+
+--[[    if  not status and graySwitch == 'off' then
+        return false,-1,nil
+    end]]
+
+    local runtimeCache  = cache:new(ngx.var.sysConfig)
     --step 1: read frome cache, but error
     local divsteps = runtimeCache:getSteps(hostname)
     if not divsteps then
@@ -190,7 +274,11 @@ local pfunc = function()
     return true, divsteps, runtimegroup
 end
 
+
+
+
 local ok, status, steps, runtimeInfo = xpcall(pfunc, handler)
+ngx.log(ngx.DEBUG," ",ok," ",status," ",steps)
 if not ok then
     -- execute error, the type of status is table now
     log:errlog("getruntime\t", "error\t")
@@ -242,7 +330,6 @@ local upPfunc = function()
     end
 
 	log:debug('userinfo\t', cjson.encode(usertable))
-
 
 --  usertable is empty, it seems that will never happen
 --    if not next(usertable) then
@@ -361,13 +448,11 @@ else
     upstream = info
 end
 
-local isGray = ngx.var.gray
-ngx.log(ngx.DEBUG,type(ngx.var.gray))
-ngx.log(ngx.DEBUG,"灰度开关:",ngx.var.gray)
-
-if (upstream and isGray)  then
+if (upstream)  then
     ngx.var.backend = upstream
 end
+
+
 
 local info = doredirect(desc)
 log:errlog(info)

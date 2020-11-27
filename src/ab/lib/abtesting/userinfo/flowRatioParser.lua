@@ -51,7 +51,7 @@ _M.get = function()
     if ratio  then
         return ratio
     else
-        return nil;
+        return nui;
     end
 end
 

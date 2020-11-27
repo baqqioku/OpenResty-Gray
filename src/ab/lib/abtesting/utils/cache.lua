@@ -125,4 +125,32 @@ _M.setUpstream = function(self, info, upstream)
     cache:set(info, upstream, expire)
 end
 
+_M.setGrayServer = function(self, grayServer)
+    local cache = self.cache
+
+    for k, v in  pairs(grayServer) do
+        ngx.log(ngx.DEBUG,k,v)
+        local ok, err = cache:set(k,v)
+        if not ok then
+            return false;
+        end
+    end
+    return true
+end
+
+_M.setGrayServerSwitch = function(self,info,switch)
+    local cache  = self.cache
+    local expire = shdict_expire
+    local ok, err = cache:set(info, switch, expire)
+    if not ok then return false end
+    return true
+end
+
+_M.getGrayServer = function(self, grayServerName)
+    local cache = self.cache
+    local switch   = cache:get(grayServerName)
+    return switch
+end
+
+
 return _M
