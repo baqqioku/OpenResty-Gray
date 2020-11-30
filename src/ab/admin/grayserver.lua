@@ -159,21 +159,21 @@ end
 _M.get = function(option)
     local db = option.db
     local grayServerName = option.grayServerName
-    ngx.log(ngx.DEBUG,grayServerName)
+
     local serverName
     if grayServerName then
         serverName = grayServerName
     else
         serverName =  getGrayServerName()
     end
-
+    ngx.log(ngx.DEBUG,serverName)
     if not serverName then
         return false
     end
 
     local pfunc = function()
         local grayMod = grayServerModule:new(db.redis, grayserverLib)
-        return grayMod:get(grayserverLib,serverName)
+        return grayMod:get(serverName)
     end
 
     local status, info = xpcall(pfunc, handler)

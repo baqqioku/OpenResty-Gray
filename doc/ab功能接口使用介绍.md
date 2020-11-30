@@ -22,7 +22,10 @@ ab管理接口
 * /ab_admin?action= grayserver.set
 * /ab_admin?action= grayserver.check
 * /ab_admin?action= grayserver.del
-* /ab_admin?action= grayserver.loadInit
+* /ab_admin?action= grayserver.get
+* /ab_admin?action= grayserver.update
+* /ab_admin?action= grayserver.pageList
+
 
 #运行时信息设置（其中runtime_set接受policyid和policygroupid参数，分别用于单级分流和多级分流）
 * /ab_admin?action=runtime_get
@@ -121,7 +124,7 @@ ab管理接口
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作
-        * 参数：policygroupid: 设置第policygroupid号策略组   为   运行时策略
+        * 参数：policygroupid: 设置第policygroupid号策略组   为运行时策略
         * 参数：hostname: 为host www.wscar.com设置运行时策略
         * 返回值：{"code":200,"desc":"success "}
         * 返回值：若发生错误，则有相关提示，比如某策略不存在。
@@ -138,17 +141,7 @@ ab管理接口
         * 参数：hostname: 获取hostname主机的运行时信息
         * 系统未设置运行时信息时，返回值{"desc":"success ","code":200,"data":{"divsteps":0,"runtimegroup":{}}}
         * 系统设置运行时信息后，举例为：
-        
-        
-* 13.灰度服务设置 
-    * curl  localhost:port/ab_admin?action=grayserver_set
-  
-    * 接口说明:    
-        * 参数：action: 代表要执行的操作，获取系统运行时信息runtime_get
-        * 参数：hostname: 获取hostname主机的运行时信息
-        * 系统未设置运行时信息时，返回值{"desc":"success ","code":200,"data":{"divsteps":0,"runtimegroup":{}}}
-        * 系统设置运行时信息后，举例为：       
-         
+           
 
 ```bash
         {
@@ -183,6 +176,87 @@ ab管理接口
     * 接口说明:    
         * 参数：action: 代表要执行的操作，删除系统运行时信息runtime_del
         * 返回值：{"code":200,"desc":"success "}
+        
+* 13.灰度服务设置 
+    * curl  localhost:port/ab_admin?action=grayserver_set -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作，新增灰度服务开关 grayserver_set
+        * 系统设置灰度服务开关，返回值
+        {
+            "desc": "success ",
+            "code": 200,
+            "data": [
+                "gray server abc",
+                "gray server driver"
+            ]
+        }
+        
+* 14.灰度服务更新
+    * curl  localhost:port/ab_admin?action=grayserver_update -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作，新增灰度服务开关 grayserver_update
+        * 系统设置灰度服务开关，返回值
+        {
+            "desc": "success ",
+            "code": 200,
+            "data": [
+                "gray server abc",
+                "gray server driver"
+            ]
+        }        
+
+* 15.灰度服务删除
+    * curl  localhost:8080/ab_admin?action=grayserver_del&server_name=driver
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作，新增灰度服务开关 grayserver_del
+        * 参数：server_name : 代表服务名
+        * 灰度服务删除，返回值
+        {
+            "desc": "success ",
+            "code": 200
+        }  
+        
+* 15.灰度服务查看
+             * curl  localhost:8080/ab_admin?action=grayserver_get&server_name=abc
+           
+             * 接口说明:    
+                 * 参数：action: 代表要执行的操作，新增灰度服务开关 grayserver_get
+                 * 参数：server_name : 代表服务名
+                 * 灰度服务查看，返回值
+                 {
+                     "desc": "success ",
+                     "code": 200,
+                     "data": {
+                         "switch": "on",
+                         "name": "abc"
+                     }
+                 }
+                 
+* 15.灰度服务列表
+    * curl  localhost:8080/ab_admin?action=grayserver_pageList&page=1&size=2
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作，获取灰度服务列表 grayserver_pageList
+        * 参数：page 页数
+        * 参数：size 页码
+        * 灰度服务列表，返回值
+        {
+            "code": 200,
+            "data": [
+                {
+                    "name": "driver",
+                    "switch": "off"
+                },
+                {
+                    "name": "carlife",
+                    "switch": "on"
+                }
+            ],
+            "desc": "success "
+        }
 
 ab分流接口
 ------------------

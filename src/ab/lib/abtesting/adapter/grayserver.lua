@@ -87,6 +87,7 @@ _M.get = function(self,serverName)
     local baseLibrary = self.baseLibrary
     local ret = {}
     local switch,err = database:hget(baseLibrary,serverName)
+    ngx.log(ngx.DEBUG,switch)
     if not switch then
         error{ERRORINFO.REDIS_ERROR,err}
     elseif switch == ngx.null then

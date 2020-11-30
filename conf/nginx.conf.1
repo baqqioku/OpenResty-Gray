@@ -96,7 +96,7 @@ http {
         set $policy_prefix  'ab:test:policies';
 
         set $default_backend 'stable';
-        set $shdict_expire 600;
+        set $shdict_expire 60;
 
         set $rt_cache_lock rt_locks;    #set name of cache locks, should be same as lua_shared_dict
         set $up_cache_lock up_locks;
@@ -118,12 +118,28 @@ http {
 
         }
 
-
-        location /ab_admin {
-            set $kv_gray kv_api_root_grayServer;
-            content_by_lua_file 'E:/Tools/openresty-1.19.3.1-win64/luacode/ab/admin/ab_action.lua';
+        location = /admin/policy/set {
+            content_by_lua_file '../admin/policy/set.lua';
+        }
+        location = /admin/policy/get {
+            content_by_lua_file '../admin/policy/get.lua';
+        }
+        location = /admin/policy/del {
+            content_by_lua_file '../admin/policy/del.lua';
+        }
+        location = /admin/policy/check {
+            content_by_lua_file '../admin/policy/check.lua';
         }
 
+        location = /admin/runtime/set {
+            content_by_lua_file '../admin/runtime/set.lua';
+        }
+        location = /admin/runtime/get {
+            content_by_lua_file '../admin/runtime/get.lua';
+        }
+        location = /admin/runtime/del {
+            content_by_lua_file '../admin/runtime/del.lua';
+        }
 
         location /nginx_status {
             stub_status on;
@@ -142,7 +158,51 @@ http {
     }
 
 
+    server {
+        listen       80;
+        server_name  localhost;
 
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+        #    proxy_pass   http://127.0.0.1;
+        #}
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    }
 
     server {
         listen       8001;
