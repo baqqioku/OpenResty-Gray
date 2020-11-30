@@ -204,7 +204,7 @@ local pfunc = function()
         return false,-1,nil
     end
 
-    ngx.log(ngx.DEBUG,'灰度开关:',ngx.var.gray)
+   -- ngx.log(ngx.DEBUG,'灰度开关:',ngx.var.gray)
     local ok,status, graySwitch = xpcall(loadGrayServer,handler)
     ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
