@@ -100,7 +100,7 @@ _M.set = function(option)
         ngx.say(response)
         return false
     else
-        local grayServerCache  = cache:new(ngx.var.kv_gray)
+        local grayServerCache  = cache:new('kv_api_root_grayServer')
 
         for _, v in pairs(garyServer) do
             grayServerCache:setGrayServerSwitch(v['name'],v['switch'])
@@ -206,6 +206,29 @@ _M.loadInit = function(option)
         if ok then
             return grayServer
         end
+    end
+end
+
+_M.pageList = function(option)
+    local db = option.db
+
+    local page = ngx.var.arg_page
+    local size = ngx.var.arg_size
+    local grayfunc = function()
+        local gray = grayServerModule:new(db.redis, grayserverLib)
+        return gray:pageList(page,size)
+    end
+
+    local status, info = xpcall(grayfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    else
+        local response = doresp(ERRORINFO.SUCCESS, nil, info)
+        log:info(dolog(ERRORINFO.SUCCESS, nil))
+        ngx.say(response)
+        return true
     end
 end
 

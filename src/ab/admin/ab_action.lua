@@ -46,6 +46,7 @@ ab_action.grayserver_set     = grayserver.set
 ab_action.grayserver_check   = grayserver.check
 ab_action.grayserver_del     = grayserver.del
 ab_action.grayserver_load    = grayserver.loadInit
+ab_action.grayserver_pageList = grayserver.pageList
 
 local get_uriargs_error = function()
     local info = ERRORINFO.ACTION_BLANK_ERROR

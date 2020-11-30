@@ -48,6 +48,7 @@ _M.set = function(self, grayServer)
     for _, v in pairs(grayServer) do
         database:hset(prefix, v[k_name], v[k_switch])
         serverNames[i] = 'gray server '..v[k_name];
+
         i = i+1;
     end
     local ok, err = database:commit_pipeline()
@@ -114,6 +115,43 @@ _M.loadAll = function(self)
         if not serverSwitch then error{ERRORINFO.REDIS_ERROR, err} end
         grayServer[serverNames[i]] = serverSwitch
     end
+    ngx.log(ngx.DEBUG,cjson.encode(grayServer))
+    return grayServer
+end
+
+_M.pageList = function(self,page,size)
+    local database = self.database
+    local baseLibrary = self.baseLibrary
+    local serverNames,err = database:hkeys(baseLibrary)
+    local page = page or 1
+    local size = size or 20
+    local startIndex = (page-1)*size + 1
+    local endIndex = page*size
+
+
+    local grayServer = {}
+    local hkeys = {}
+
+    if not serverNames then
+        return grayServer
+    end
+    local maxIndex = #serverNames
+    if endIndex > maxIndex then
+        endIndex = maxIndex
+    end
+    for i=startIndex,endIndex do
+        hkeys[i] = serverNames[i]
+    end
+
+    for i,v in pairs(hkeys) do
+        local serverSwitch,err = database:hget(baseLibrary,serverNames[i])
+        if not serverSwitch then error{ERRORINFO.REDIS_ERROR, err} end
+        local single = {}
+        single.name = serverNames[i]
+        single.switch = serverSwitch
+        grayServer[i]= single
+    end
+
     ngx.log(ngx.DEBUG,cjson.encode(grayServer))
     return grayServer
 end

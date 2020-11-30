@@ -13,7 +13,7 @@ local indices       = systemConf.indices
 local fields        = systemConf.fields
 
 local divConf       = systemConf.divConf
-local shdict_expire = tonumber(divConf.shdict_expire or 60)
+local shdict_expire = divConf.shdict_expire or 60
 
 _M.new = function(self, sharedDict)
     if not sharedDict then
@@ -141,7 +141,6 @@ end
 _M.setGrayServerSwitch = function(self,info,switch)
     local cache  = self.cache
     local expire = shdict_expire
-    ngx.log(ngx.DEBUG,expire)
     local ok, err = cache:set(info, switch, expire)
     if not ok then return false end
     return true
