@@ -4,10 +4,10 @@
     </description>
     <!-- set global properties for this build -->
     <property name="openresty-home" location="E:/Tools/openresty-1.19.3.1-win64/"/>
-    <property name="conf" location="/myConf"/>
+    <property name="conf" location="${basedir}/myConf"/>
     <property name="html" location="${basedir}/html"/>
     <property name="src" location="${basedir}/src/ab"/>
-    <property name="target-conf" location="${openresty-home}/myConf"/>
+    <property name="target-conf" location="${openresty-home}/conf"/>
     <property name="target-html" location="${openresty-home}/html"/>
     <property name="target-src" location="${openresty-home}/luacode/${ant.project.name}"/>
 
@@ -33,7 +33,7 @@
     <target name="dist" depends="init" description="generate the distribution" >
         <echo>复制安装文件</echo>
         <copy todir="${target-conf}">
-            <fileset dir="/myConf"></fileset>
+            <fileset dir="${conf}"></fileset>
         </copy>
         <copy todir="${target-src}">
             <fileset dir="${src}"></fileset>
