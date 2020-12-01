@@ -48,6 +48,105 @@ ab管理接口
         * action: 代表要执行的操作
         * 仅接受POST方法，POST数据为待检查策略的json字符串
         * 返回值：{"code":200,"desc":"success  the id of new policy is 20"}，策略添加成功，返回策略号policyid，样例中policyid为20
+````  
+   1.添加token分流策略
+
+      server:port/ab_admin?action=policy_set
+    
+      提交报文：
+      
+        {
+            "divtype": "version",
+            "divdata": [
+                {
+                    "version": "2.1",
+                    "upstream": "beta1"
+                },
+                {
+                    "version": "2.2",
+                    "upstream": "beta2"
+                }
+            ]
+        }
+
+   2.添加白名单策略
+      server:port/ab_admin?action=policy_set
+
+      提交报文：
+            
+          {
+              "divtype": "uidappoint",
+              "divdata": [
+                  {
+                      "uidset": [
+                          1234,
+                          5124,
+                          653
+                      ],
+                      "upstream": "beta1"
+                  },
+                  {
+                      "uidset": [
+                          3214,
+                          652,
+                          145
+                      ],
+                      "upstream": "beta2"
+                  }
+              ]
+          }
+
+   3. 添加token分流策略
+     
+      server:port/ab_admin?action=policy_set
+      
+    提交报文
+      
+    {
+        "divtype": "token",
+        "divdata": [
+            {
+                "tokenset": [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "upstream": "beta1"
+            }
+        ]
+    }
+
+    4.添加城市区域分流策略
+        server:port/ab_admin?action=policy_set
+
+      提交报文
+      
+      {
+          "divtype": "arg_city",
+          "divdata": [
+              {
+                  "city": "BJ",
+                  "upstream": "beta1"
+              },
+              {
+                  "city": "SH",
+                  "upstream": "beta2"
+              },
+              {
+                  "city": "TJ",
+                  "upstream": "beta1"
+              },
+              {
+                  "city": "CQ",
+                  "upstream": "beta3"
+              }
+          ]
+      }
+    
+    
+   
+
+````
 
 * 3.向系统修改策略
  * curl localhost:port/ab_admin?action=policy_update&policyid=20 -d '{"divtype":"uidsuffix","divdata":[{"suffix":"1","upstream":"beta1"},{"suffix":"3","upstream":"beta2"},{"suffix":"5","upstream":"beta1"},{"suffix":"0","upstream":"beta3"}]}'`

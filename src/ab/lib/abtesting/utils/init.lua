@@ -49,7 +49,7 @@ _M.prefixConf = {
 _M.divConf = {
     ["default_backend"]     = ngx.var.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = ngx.var.shdict_expire or 60
+    ["shdict_expire"]       = ngx.var.shdict_expire or 600
 }
 
 _M.cacheConf = {
