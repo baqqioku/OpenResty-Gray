@@ -13,6 +13,10 @@ local runtimeModule     = require('abtesting.adapter.runtime')
 local systemConf        = require('abtesting.utils.init')
 local policyModule      = require('abtesting.adapter.policy')
 local policyGroupModule = require('abtesting.adapter.policygroup')
+local utils         = require('abtesting.utils.utils')
+local cjson         = require('cjson.safe')
+
+
 local prefixConf        = systemConf.prefixConf
 local divtypes          = systemConf.divtypes
 local policyLib         = prefixConf.policyLibPrefix
@@ -170,6 +174,63 @@ _M.del = function(self, domain)
 
     local ok, err = database:del(divStep)
     if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+end
+
+_M.list = function(self)
+    local database = self.database
+    local baseLibrary = self.baseLibrary
+    local allRuntime,err = database:keys(baseLibrary..'*')
+    local ret = {}
+    if not allRuntime then
+        return ret
+    end
+    local domainList = {}
+    local i=1
+    for k,v in ipairs(allRuntime) do
+        local strList = utils.split(v,":")
+        if #strList>4 then
+            -- continue
+        else
+            domainList[i] = v
+            i = i+1;
+        end
+    end
+
+    local divStepList = {}
+    local realDomainList = {}
+
+    if #domainList >0 then
+        for k,v in ipairs(domainList) do
+            local str = utils.split(v,":")
+            realDomainList[k] = str[3]
+            local ok, err = database:get(v)
+            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+            local divstepsDomain = tonumber(ok)
+            divStepList[str[3]] = divstepsDomain
+        end
+    end
+
+    local i=1
+    for k,v in ipairs(realDomainList) do
+        local model = {}
+        local _domain = v
+        model.domain = _domain
+        local prefix = baseLibrary .. ':' .. _domain
+        local divSteps = divStepList[_domain]
+        local realModelName = {}
+        for i = 1, divSteps do
+            local idx = indices[i]
+            local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
+            local ok,err = database:get(divModulenameKey)
+            if ok then
+                realModelName[i] = ok
+            end
+        end
+        model.modulenames = realModelName
+        ret[k] = model
+    end
+    ngx.log(ngx.DEBUG,cjson.encode(ret))
+    return ret;
 end
 
 return _M

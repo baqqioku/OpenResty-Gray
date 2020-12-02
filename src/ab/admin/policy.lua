@@ -305,6 +305,26 @@ _M.get = function(option)
         ngx.say(response)
         return true
     end
+end
+
+_M.list = function(option)
+    local db = option.db
+
+    local pfunc = function()
+        local policyIO = policyModule:new(db.redis, policyLib)
+        return policyIO:list()
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    else
+        local response = doresp(ERRORINFO.SUCCESS, nil, info)
+        log:errlog(dolog(ERRORINFO.SUCCESS, nil))
+        ngx.say(response)
+        return true
+    end
 
 end
 

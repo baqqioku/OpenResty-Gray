@@ -11,12 +11,14 @@ ab管理接口
 * /ab_admin?action=policy_get
 * /ab_admin?action=policy_del
 * /ab_admin?action=policy_update
+* /ab_admin?action=policy_list
 
 #策略组管理（用于多级分流）
 * /ab_admin?action=policygroup_check
 * /ab_admin?action=policygroup_set
 * /ab_admin?action=policygroup_get
 * /ab_admin?action=policygroup_del
+*/ab_admin?action=policygroup_list
 
 #灰度服务管理
 * /ab_admin?action= grayserver.set
@@ -31,6 +33,8 @@ ab管理接口
 * /ab_admin?action=runtime_get
 * /ab_admin?action=runtime_set
 * /ab_admin?action=runtime_del
+* /ab_admin?action=runtime_list
+
 ```
 * 1.检查策略是否合法                    
     * curl localhost:port/ab_admin?action=policy_check -d '{"divtype":"uidsuffix","divdata":[{"suffix":"1","upstream":"beta1"},{"suffix":"3","upstream":"beta2"},{"suffix":"5","upstream":"beta1"},{"suffix":"0","upstream":"beta3"}]}'
@@ -167,12 +171,68 @@ ab管理接口
         * 返回值：{"desc":"success ","code":200,"data":{"divdata":["1","beta1","3","beta2","5","beta1","0","beta3"],"divtype":"uidsuffix"}} 返回值中data部分是读取的策略数据，json格式。
 
 * 5.从系统删除策略                    
-    * curl localhost:port/ab_admin?action=policy_del&policyid=20
+    * curl localhost:port/ab_admin?action=policy_list
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作
-        * 参数：policyid: 删除第policyid号策略
-        * 返回值：{"code":200,"desc":"success "}
+        * 返回值：
+        
+        {
+            "code": 200,
+            "desc": "success ",
+            "data": [
+                {
+                    "divtype": "uidsuffix",
+                    "policyId": 9
+                },
+                {
+                    "divtype": "arg_city",
+                    "policyId": 10
+                },
+                {
+                    "divtype": "uidsuffix",
+                    "policyId": 6
+                },
+                {
+                    "divtype": "arg_city",
+                    "policyId": 2
+                },
+                {
+                    "divtype": "iprange",
+                    "policyId": 8
+                },
+                {
+                    "divtype": "token",
+                    "policyId": 0
+                },
+                {
+                    "divtype": "uidsuffix",
+                    "policyId": 9
+                },
+                {
+                    "divtype": "uidsuffix",
+                    "policyId": 3
+                },
+                {
+                    "divtype": "iprange",
+                    "policyId": 8
+                },
+                {
+                    "divtype": "token",
+                    "policyId": 0
+                },
+                {
+                    "divtype": "version",
+                    "policyId": 1
+                },
+                {
+                    "divtype": "arg_city",
+                    "policyId": 4
+                }
+            ]
+        }
+        
+
 
 * 6.检查策略组是否合法                    
     * curl  localhost:port/ab_admin?action=policygroup_check -d '{"1":{"divtype":"uidappoint","divdata":[{"uidset":[1234,5124,653],"upstream":"beta1"},{"uidset":[3214,652,145],"upstream":"beta2"}]},"2":{"divtype":"iprange","divdata":[{"range":{"start":1111,"end":2222},"upstream":"beta1"},{"range":{"start":3333,"end":4444},"upstream":"beta2"},{"range":{"start":7777,"end":8888},"upstream":"beta3"}]}}
@@ -183,8 +243,44 @@ ab管理接口
         * 返回值：{"code":200,"desc":"success "}，系统中如果返回非200的code码，就认为是发生错误，desc为错误信息。
         * 错误返回值：{"code":50102,"desc":"parameter error for postData is not a json string"} 如果出错，返回错误码与对应错误信息，反馈给用户，其他接口同样。
 
+*7.获取系统策略组列表
+    * curl   localhost:port/ab_admin?action=policygroup_list
+    * 接口说明:    
+            * action: 代表要执行的操作
+            * 返回值：
+              {
+                  "data": [
+                      {
+                          "groups": [
+                              "9",
+                              "10",
+                              "11"
+                          ],
+                          "id": "2"
+                      },
+                      {
+                          "groups": [
+                              "3",
+                              "4",
+                              "5"
+                          ],
+                          "id": "0"
+                      },
+                      {
+                          "groups": [
+                              "6",
+                              "7",
+                              "8"
+                          ],
+                          "id": "1"
+                      }
+                  ],
+                  "code": 200,
+                  "desc": "success "
+              }
 
-* 7.向系统添加策略组                    
+
+* 8.向系统添加策略组                    
     * curl   localhost:port/ab_admin?action=policygroup_set -d '{"1":{"divtype":"uidappoint","divdata":[{"uidset":[1234,5124,653],"upstream":"beta1"},{"uidset":[3214,652,145],"upstream":"beta2"}]},"2":{"divtype":"iprange","divdata":[{"range":{"start":1111,"end":2222},"upstream":"beta1"},{"range":{"start":3333,"end":4444},"upstream":"beta2"},{"range":{"start":7777,"end":8888},"upstream":"beta3"}]}}
   
     * 接口说明:    
@@ -192,7 +288,7 @@ ab管理接口
         * 仅接受POST方法，POST数据为待检查策略的json字符串
         * 返回值：{"desc":"success ","code":200,"data":{"groupid":2,"group":[11,12]}}，策略组添加成功，返回策略组号groupid是2，组中包括两个策略，策略id分别是11和12.
 
-* 8.从系统读取策略组                    
+* 9.从系统读取策略组                    
     * curl  localhost:port/ab_admin?action=policygroup_get&policygroupid=2
   
     * 接口说明:    
@@ -200,15 +296,46 @@ ab管理接口
         * 参数：policyid: 获取第policygroupid号策略组
         * 返回值：{"desc":"success ","code":200,"data":{"groupid":2,"group":["11","12"]}} 返回值以json格式返回该组策略中包括哪些策略。
 
-* 9.从系统删除策略组                    
+* 10.从系统删除策略组                    
     * curl  localhost:port/ab_admin?action=policygroup_del&policygroupid=2
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作
         * 参数：policyid: 删除第policygroupid号策略组
         * 返回值：{"code":200,"desc":"success "}
+        
+ * 11.获取系统运行时策略列表         
+     * curl  localhost:port/ab_admin?action=runtime_list
+   
+     * 接口说明:    
+         * 参数：action: 代表要执行的操作
+         * 返回值：
+         {
+             "data": [
+                 {
+                     "modulenames": [
+                         "abtesting.diversion.uidsuffix",
+                         "abtesting.diversion.arg_city",
+                         "abtesting.diversion.iprange"
+                     ],
+                     "domain": "172.18.5.26"
+                 },
+                 {
+                     "modulenames": [
+                         "abtesting.diversion.uidsuffix",
+                         "abtesting.diversion.arg_city",
+                         "abtesting.diversion.iprange"
+                     ],
+                     "domain": "localhost"
+                 }
+             ],
+             "code": 200,
+             "desc": "success "
+         }
+         
+             
 
-* 10.设置***策略***为系统的运行时策略，进行单级分流         
+* 12.设置***策略***为系统的运行时策略，进行单级分流         
     * curl  localhost:port/ab_admin?action=runtime_set&policyid=22&hostname=api.weibo.cn
   
     * 接口说明:    
@@ -218,7 +345,7 @@ ab管理接口
         * 返回值：{"code":200,"desc":"success "}
         * 注意：设置运行时信息的动作会导致原来数据库中的运行时信息删除，不论本次设置是否成功
 
-* 11.设置***策略组***为系统的运行时策略，进行多级分流
+* 13.设置***策略组***为系统的运行时策略，进行多级分流
     * curl  localhost:port/ab_admin?action=runtime_set&policygroupid=4&hostname=www.wscar.com
   
     * 接口说明:    
@@ -232,7 +359,7 @@ ab管理接口
         * 请注意：设置运行时信息的动作会导致原来数据库中的运行时信息删除，不论本次设置是否成功
 
 
-* 12.获取系统运行时信息 
+* 14.获取系统运行时信息 
     * curl  localhost:port/ab_admin?action=runtime_get&hostname=www.wscar.com
   
     * 接口说明:    
@@ -269,14 +396,14 @@ ab管理接口
         # divDataKey为运行时的分流策略名
 ```
 
-* 12.删除系统运行时信息                   
+* 15.删除系统运行时信息                   
     * curl  localhost:port/ab_admin?action=runtime_del&hostname=api.weibo.cn
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作，删除系统运行时信息runtime_del
         * 返回值：{"code":200,"desc":"success "}
         
-* 13.灰度服务设置 
+* 16.灰度服务设置 
     * curl  localhost:port/ab_admin?action=grayserver_set -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
   
     * 接口说明:    
@@ -291,7 +418,7 @@ ab管理接口
             ]
         }
         
-* 14.灰度服务更新
+* 17.灰度服务更新
     * curl  localhost:port/ab_admin?action=grayserver_update -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
   
     * 接口说明:    
@@ -306,7 +433,7 @@ ab管理接口
             ]
         }        
 
-* 15.灰度服务删除
+* 18.灰度服务删除
     * curl  localhost:8080/ab_admin?action=grayserver_del&server_name=driver
   
     * 接口说明:    
@@ -318,7 +445,7 @@ ab管理接口
             "code": 200
         }  
         
-* 15.灰度服务查看
+* 19.灰度服务查看
              * curl  localhost:8080/ab_admin?action=grayserver_get&server_name=abc
            
              * 接口说明:    
@@ -334,7 +461,7 @@ ab管理接口
                      }
                  }
                  
-* 15.灰度服务列表
+* 20.灰度服务列表
     * curl  localhost:8080/ab_admin?action=grayserver_pageList&page=1&size=2
   
     * 接口说明:    

@@ -234,6 +234,28 @@ _M.runtimeset = function(option, policyId)
     return true
 end
 
+_M.list = function(option)
+    local db = option.db
+    local database = db.redis
+
+    local pfunc = function()
+        local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
+        return runtimeGroupMod:list()
+    end
+
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    local response = doresp(ERRORINFO.SUCCESS, nil, info)
+    ngx.say(response)
+    return true
+
+end
+
 
 
 return _M

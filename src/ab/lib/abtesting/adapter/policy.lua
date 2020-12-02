@@ -8,6 +8,9 @@ local mt = { __index = _M }
 
 local ERRORINFO = require('abtesting.error.errcode').info
 local fields    = require('abtesting.utils.init').fields
+local utils         = require('abtesting.utils.utils')
+local cjson         = require('cjson.safe')
+
 
 local separator = ':'
 ---
@@ -157,6 +160,41 @@ _M.get = function(self, id)
     policy.divtype      = divtype
     policy.divdata      = divdata
     return policy
+end
+
+_M.list = function(self)
+    local database = self.database
+    local baseLibrary  = self.baseLibrary
+    local policyKey      = table.concat({baseLibrary, '*'}, separator)
+
+
+    local policys, err = database:keys(policyKey)
+    if not policys or type(policys) ~= 'table' then
+        error{ERRORINFO.REDIS_ERROR, err}
+    end
+    ngx.log(ngx.DEBUG,cjson.encode(policys))
+
+    local ret = {}
+    local divTypeKeys = {}
+
+    for i=1,#policys/2 do
+        local policy = utils.split(policys[i],separator)
+        local prefix = policy[1]..separator..policy[2]..separator..policy[3]
+        local divtypeKey =  table.concat({prefix, fields.divtype}, separator)
+
+        local result = {}
+        local ok,err = database:get(divtypeKey)
+        if ok then
+            result.divtype = ok
+        end
+        result.policyId = tonumber(policy[3])
+
+        ret[i] = result
+    end
+
+    ngx.log(ngx.DEBUG,cjson.encode(ret))
+
+    return ret
 end
 
 return _M

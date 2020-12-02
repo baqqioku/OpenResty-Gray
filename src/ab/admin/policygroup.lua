@@ -14,6 +14,8 @@ local handler       = require('abtesting.error.handler').handler
 local utils         = require('abtesting.utils.utils')
 local log			= require('abtesting.utils.log')
 local ERRORINFO     = require('abtesting.error.errcode').info
+local utils         = require('abtesting.utils.utils')
+
 
 local cjson         = require('cjson.safe')
 local doresp        = utils.doresp
@@ -254,18 +256,12 @@ _M.get = function(option)
     return true
 end
 
-_M.del = function(option)
+_M.list = function(option)
     local db = option.db
 
-    local policyGroupId = getPolicyGroupId()
-    if not policyGroupId then
-        return false
-    end
-
     local pfunc = function()
-        local policyGroupMod = policyGroupModule:new(db.redis,
-                                        policyGroupLib, policyLib)
-        return policyGroupMod:del(policyGroupId)
+        local policyGroupMod = policyGroupModule:new(db.redis, policyGroupLib, policyLib)
+        return policyGroupMod:list()
     end
     local status, info = xpcall(pfunc, handler)
     if not status then
@@ -273,7 +269,8 @@ _M.del = function(option)
         ngx.say(response)
         return false
     end
-    local response = doresp(ERRORINFO.SUCCESS)
+
+    local response = doresp(ERRORINFO.SUCCESS, nil, info)
     ngx.say(response)
     return true
 end

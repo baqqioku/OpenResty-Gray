@@ -9,6 +9,8 @@ local mt = { __index = _M }
 local ERRORINFO     = require('abtesting.error.errcode').info
 local policyModule  = require('abtesting.adapter.policy')
 local fields        = require('abtesting.utils.init').fields
+local utils         = require('abtesting.utils.utils')
+
 
 local separator = ':'
 ---
@@ -188,4 +190,46 @@ _M.get = function(self, id)
 
     return ret
 end
+
+_M.list = function(self)
+    local database = self.database
+    local groupLibrary  = self.groupLibrary
+    local groupKey      = table.concat({groupLibrary, '*'}, separator)
+
+    local idCountKey =  table.concat({groupLibrary, fields.idCount}, separator)
+
+    local group, err = database:keys(groupKey)
+    if not group or type(group) ~= 'table' then
+        error{ERRORINFO.REDIS_ERROR, err}
+    end
+
+    local groupList = {}
+    local k=1
+    for i=1,#group do
+        if group[i] == idCountKey then
+            --continue
+        else
+            groupList[k] = group[i]
+            k = k+1
+        end
+    end
+    local ret = {}
+    for i=1,#groupList do
+
+        local result = {}
+        local groupKey = groupList[i]
+        local ids = utils.split(groupKey,separator)
+        local id = ids[3]
+        local groups, err = database:lrange(groupList[i], 0, -1)
+        if not groups or type(groups) ~= 'table' then
+            error{ERRORINFO.REDIS_ERROR, err}
+        end
+        result.id = id
+        result.groups = groups
+        ret[i] = result
+    end
+
+    return ret
+end
+
 return _M
