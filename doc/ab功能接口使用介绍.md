@@ -18,7 +18,7 @@ ab管理接口
 * /ab_admin?action=policygroup_set
 * /ab_admin?action=policygroup_get
 * /ab_admin?action=policygroup_del
-*/ab_admin?action=policygroup_list
+* /ab_admin?action=policygroup_list
 
 #灰度服务管理
 * /ab_admin?action= grayserver.set
