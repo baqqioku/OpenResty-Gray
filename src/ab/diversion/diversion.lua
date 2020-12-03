@@ -199,7 +199,7 @@ local pfunc = function()
     end
 
     local ok,status, graySwitch = xpcall(loadGrayServer,handler)
-    ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
+    --ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
     if not ok then
         -- execute error, the type of status is table now
