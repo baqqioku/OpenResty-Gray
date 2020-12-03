@@ -313,7 +313,7 @@ ab管理接口
          {
              "data": [
                  {
-                     "modulenames": [
+                     "divtypes": [
                          "abtesting.diversion.uidsuffix",
                          "abtesting.diversion.arg_city",
                          "abtesting.diversion.iprange"
@@ -321,7 +321,7 @@ ab管理接口
                      "domain": "172.18.5.26"
                  },
                  {
-                     "modulenames": [
+                     "divtypes": [
                          "abtesting.diversion.uidsuffix",
                          "abtesting.diversion.arg_city",
                          "abtesting.diversion.iprange"

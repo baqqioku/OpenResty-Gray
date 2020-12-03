@@ -223,10 +223,11 @@ _M.list = function(self)
             local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
             local ok,err = database:get(divModulenameKey)
             if ok then
-                realModelName[i] = ok
+                local divtype = utils.split2(ok,".")[3]
+                realModelName[i] = divtype
             end
         end
-        model.modulenames = realModelName
+        model.divtypes = realModelName
         ret[k] = model
     end
     ngx.log(ngx.DEBUG,cjson.encode(ret))
