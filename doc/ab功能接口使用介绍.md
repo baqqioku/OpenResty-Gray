@@ -55,7 +55,7 @@ ab管理接口
 ````  
    1.添加token分流策略
 
-      server:port/ab_admin?action=policy_set
+      curl server:port/ab_admin?action=policy_set
     
       提交报文：
       
@@ -74,7 +74,7 @@ ab管理接口
         }
 
    2.添加白名单策略
-      server:port/ab_admin?action=policy_set
+      curl server:port/ab_admin?action=policy_set
 
       提交报文：
             
@@ -102,7 +102,7 @@ ab管理接口
 
    3. 添加token分流策略
      
-      server:port/ab_admin?action=policy_set
+      curl server:port/ab_admin?action=policy_set
       
     提交报文
       
@@ -121,7 +121,7 @@ ab管理接口
     }
 
     4.添加城市区域分流策略
-        server:port/ab_admin?action=policy_set
+      curl  server:port/ab_admin?action=policy_set
 
       提交报文
       
