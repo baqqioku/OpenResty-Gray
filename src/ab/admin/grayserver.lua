@@ -100,7 +100,8 @@ _M.set = function(option)
         ngx.say(response)
         return false
     else
-        local grayServerCache  = cache:new('kv_api_root_grayServer')
+        ngx.log(ngx.DEBUG,ngx.var.kv_gray)
+        local grayServerCache  = cache:new(ngx.var.kv_gray)
 
         for _, v in pairs(garyServer) do
             grayServerCache:setGrayServerSwitch(v['name'],v['switch'])
@@ -141,8 +142,8 @@ _M.del = function(option)
     end
 
     local pfunc = function()
-        local policyMod = grayServerModule:new(db.redis, grayserverLib)
-        return policyMod:del(serverName)
+        local grayServerMode = grayServerModule:new(db.redis, grayserverLib)
+        return grayServerMode:del(serverName)
     end
 
     local status, info = xpcall(pfunc, handler)

@@ -122,7 +122,7 @@ local red = redisModule:new(redisConf)
 
 -- loadGrayServer from cache or connectdb
 local loadGrayServer = function()
-
+    ngx.log(ngx.DEBUG,ngx.var.kv_gray)
     local grayServerCache  = cache:new(ngx.var.kv_gray)
     local url = ngx.var.uri;
     local urls = utils.split(url,"/")
