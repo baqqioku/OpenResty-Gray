@@ -53,7 +53,7 @@ ab管理接口
         * 仅接受POST方法，POST数据为待检查策略的json字符串
         * 返回值：{"code":200,"desc":"success  the id of new policy is 20"}，策略添加成功，返回策略号policyid，样例中policyid为20
 ````  
-   1.添加token分流策略
+   1.添加version分流策略
 
       curl server:port/ab_admin?action=policy_set
     
