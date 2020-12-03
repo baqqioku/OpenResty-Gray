@@ -160,6 +160,8 @@ local loadGrayServer = function()
         -- graySwitch = 0, div switch off, goto default upstream
         if sem then sema:post(1) end
         return false, graySwitch,'graySwitch == off, div switch off'
+    else
+        return true,graySwitch
     end
 
     -- step 4: fetch from redis
