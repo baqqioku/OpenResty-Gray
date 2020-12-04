@@ -126,6 +126,7 @@ local loadGrayServer = function()
     ngx.log(ngx.DEBUG,ngx.var.kv_gray)
     local grayServerCache  = cache:new(ngx.var.kv_gray)
     local url = ngx.var.uri;
+    ngx.log(ngx.DEBUG,'请求路径:',url)
     local urls = utils.split(url,"/")
     local length = #urls
     local grayServerName
@@ -135,7 +136,7 @@ local loadGrayServer = function()
             break
         end
     end
-
+    ngx.log(ngx.DEBUG,'灰度服务名:',grayServerName)
     --step 1: read frome cache, but error
     local graySwitch = grayServerCache:getGrayServer(grayServerName)
     if not graySwitch then

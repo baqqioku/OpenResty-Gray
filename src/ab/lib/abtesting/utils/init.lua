@@ -35,8 +35,18 @@ _M.divtypes = {
     ["token"]       = 'tokenParser',
     ["version"]     = 'versionParser',
     ["flowratio"]   =  'flowRatioParser'
+}
 
-}   
+_M.divtypeNames = {
+    ["iprange"]     = 'ip范围',
+    ["uidsuffix"]   = 'id后缀',
+    ["uidappoint"]  = '白名单',
+    ["arg_city"]    = '城市区域',
+    ["url"]         = 'url地址',
+    ["token"]       = 'token解析',
+    ["version"]     = '版本',
+    ["flowratio"]   =  '流量比例'
+}
 
 _M.prefixConf = {
     ["policyLibPrefix"]     = 'ab:policies',
