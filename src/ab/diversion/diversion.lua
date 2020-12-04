@@ -105,6 +105,7 @@ local connectdb = function(red, redisConf)
 end
 
 local hostname = getHost()
+ngx.log(ngx.DEBUG,'host:',hostname)
 if not hostname then
     local info = ERRORINFO.ARG_BLANK_ERROR
     local desc = 'cannot get [Host] from req headers'
