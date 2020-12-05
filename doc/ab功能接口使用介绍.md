@@ -311,26 +311,32 @@ ab管理接口
          * 参数：action: 代表要执行的操作
          * 返回值：
          {
+             "desc": "success ",
+             "code": 200,
              "data": [
                  {
+                     "domain": "172.18.5.26",
                      "divtypes": [
-                         "abtesting.diversion.uidsuffix",
-                         "abtesting.diversion.arg_city",
-                         "abtesting.diversion.iprange"
-                     ],
-                     "domain": "172.18.5.26"
+                         "uidsuffix",
+                         "arg_city",
+                         "iprange"
+                     ]
                  },
                  {
+                     "domain": "localhost",
                      "divtypes": [
-                         "abtesting.diversion.uidsuffix",
-                         "abtesting.diversion.arg_city",
-                         "abtesting.diversion.iprange"
-                     ],
-                     "domain": "localhost"
+                         "uidsuffix",
+                         "arg_city",
+                         "iprange"
+                     ]
+                 },
+                 {
+                     "domain": "driverGateway-dev1.wsecar.com",
+                     "divtypes": [
+                         "token"
+                     ]
                  }
-             ],
-             "code": 200,
-             "desc": "success "
+             ]
          }
          
              
@@ -490,7 +496,7 @@ ab分流接口
 * ab分流接口目前只能配置为 location /   
 * 以***ab管理接口***小节中的第11条获取运行时信息为例，第一级是uidappoint白名单分流，第二级是iprange ip段分流方式
 
-* curl http://localhost:port/ -H 'Host:www.wscar.com' -H 'X-Uid:30'
+* curl localhost:port/ -H 'Host:www.wscar.com' -H 'X-Uid:30'
     * HOST字段是每个合法用户请求都有的，从HTTP 请求头中获取
     * 在匹配到virtual host和location后，分流功能通过location中设置的***hostkey***字段找到运行时信息，然后进行下一步的分流。
     * 因此location中的***$hostkey***字段是分流的基础，这里与ab管理功能中的设置运行时信息中的hostname参数一样
