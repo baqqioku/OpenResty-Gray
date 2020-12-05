@@ -163,10 +163,10 @@ _M.pageList = function(self,page,size)
     return page
 end
 
-_M.update = function(self,grayServer,switch)
+_M.update = function(self,grayServer,name,switch)
     local database  = self.database
     local baseLibrary = self.baseLibrary
-    local ok,err = database:hset(baseLibrary,grayServer,switch)
+    local ok,err = database:hset(baseLibrary,name,switch)
     if ok then
         return  grayServer
     end

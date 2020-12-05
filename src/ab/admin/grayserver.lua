@@ -252,9 +252,10 @@ _M.update = function(option)
 
     local server_name = ngx.var.arg_server_name
     local switch = ngx.var.arg_switch
-    if not server_name or not switch then
+    local name = ngx.var.arg_name
+    if not server_name or not switch or not name then
         local info = ERRORINFO.GRAYSERVER_INVALID_ERROR
-        local desc = "server_name or  switch "
+        local desc = "server_name or  switch or name "
         local response = doresp(info, desc)
         log:errlog(dolog(info, desc))
         ngx.say(response)
@@ -263,7 +264,8 @@ _M.update = function(option)
 
     local grayServerMod = grayServerModule:new(db.redis, grayserverLib)
     local pfunc = function()
-        return grayServerMod:update(server_name,switch)
+        grayServerModule:del(server_name)
+        return grayServerMod:update(server_name,name,switch)
     end
 
     local status, info = xpcall(pfunc, handler)
@@ -274,12 +276,12 @@ _M.update = function(option)
     else
         ngx.log(ngx.DEBUG,ngx.var.kv_gray)
         local grayServerCache  = cache:new(ngx.var.kv_gray)
-        grayServerCache:setGrayServerSwitch(server_name,switch)
+        grayServerCache:setGrayServerSwitch(name,switch)
     end
 
     local data
     if info then
-        data = info
+        data = info .. '  already update'
     end
 
     local response = doresp(ERRORINFO.SUCCESS, _, data)
