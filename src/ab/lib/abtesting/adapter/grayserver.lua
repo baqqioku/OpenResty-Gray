@@ -131,6 +131,7 @@ _M.pageList = function(self,page,size)
     local startIndex = (page-1)*size + 1
     local endIndex = page*size
 
+    ngx.log(ngx.DEBUG,startIndex,endIndex)
 
     local grayServer = {}
     local hkeys = {}
@@ -142,23 +143,27 @@ _M.pageList = function(self,page,size)
     if endIndex > maxIndex then
         endIndex = maxIndex
     end
+    local k = 1
     for i=startIndex,endIndex do
-        hkeys[i] = serverNames[i]
+        hkeys[k] = serverNames[i]
+        k = k +1
     end
 
-    for i,v in pairs(hkeys) do
-        local serverSwitch,err = database:hget(baseLibrary,serverNames[i])
+    for k,v in pairs(hkeys) do
+        ngx.log(ngx.DEBUG,hkeys[k])
+        ngx.log(ngx.DEBUG,k)
+        local serverSwitch,err = database:hget(baseLibrary,hkeys[k])
         if not serverSwitch then error{ERRORINFO.REDIS_ERROR, err} end
         local single = {}
-        single.name = serverNames[i]
+        single.name = hkeys[k]
         single.switch = serverSwitch
-        grayServer[i]= single
+        grayServer[k]= single
     end
-
-    --local page = pageMod:new(page,size,#serverNames,grayServer)
-    --ngx.log(ngx.DEBUG,type(page))
-    --ngx.log(ngx.DEBUG,cjson.encode(page))
-    return grayServer
+    ngx.log(ngx.DEBUG,cjson.encode(grayServer))
+    local pageMod = pageMod:new(page,size,#serverNames,grayServer)
+    local page = pageMod:page()
+    ngx.log(ngx.DEBUG,cjson.encode(page))
+    return page
 end
 
 

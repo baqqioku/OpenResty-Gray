@@ -14,6 +14,16 @@ _M.new = function(self,currentPage,pageSize,total,body)
 end
 
 
+_M.page = function(self)
+    local page = {}
+    page.currentPage = self.currentPage
+    page.pageSize = self.pageSize
+    page.total = self.total
+    page.body = self.body
+    return page
+end
+
+
 
 
 

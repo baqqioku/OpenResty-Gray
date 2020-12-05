@@ -186,6 +186,7 @@ _M.list = function(self)
             k = k+1
         end
     end
+    ngx.log(ngx.DEBUG,cjson.encode(policyList))
 
     for i=1,#policyList/2 do
         local policy = utils.split(policyList[i],separator)
@@ -198,6 +199,7 @@ _M.list = function(self)
             result.divtype = ok
         end
         result.policyId = tonumber(policy[3])
+        ngx.log(ngx.DEBUG,cjson.encode(result))
 
         ret[i] = result
     end
