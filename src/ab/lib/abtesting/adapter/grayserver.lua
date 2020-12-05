@@ -15,6 +15,8 @@ local log			= require('abtesting.utils.log')
 local ERRORINFO     = require('abtesting.error.errcode').info
 local cjson         = require('cjson.safe')
 
+local pageMod          = require('abtesting.utils.page')
+
 
 
 
@@ -153,7 +155,9 @@ _M.pageList = function(self,page,size)
         grayServer[i]= single
     end
 
-    ngx.log(ngx.DEBUG,cjson.encode(grayServer))
+    --local page = pageMod:new(page,size,#serverNames,grayServer)
+    --ngx.log(ngx.DEBUG,type(page))
+    --ngx.log(ngx.DEBUG,cjson.encode(page))
     return grayServer
 end
 

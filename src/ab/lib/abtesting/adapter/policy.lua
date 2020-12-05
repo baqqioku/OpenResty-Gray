@@ -166,6 +166,7 @@ _M.list = function(self)
     local database = self.database
     local baseLibrary  = self.baseLibrary
     local policyKey      = table.concat({baseLibrary, '*'}, separator)
+    local idCountKey =  table.concat({baseLibrary, fields.idCount}, separator)
 
 
     local policys, err = database:keys(policyKey)
@@ -175,10 +176,19 @@ _M.list = function(self)
     ngx.log(ngx.DEBUG,cjson.encode(policys))
 
     local ret = {}
-    local divTypeKeys = {}
+    local policyList = {}
+    local k=1
+    for i=1,#policys do
+        if policys[i] == idCountKey then
+            --continue
+        else
+            policyList[k] = policys[i]
+            k = k+1
+        end
+    end
 
-    for i=1,#policys/2 do
-        local policy = utils.split(policys[i],separator)
+    for i=1,#policyList/2 do
+        local policy = utils.split(policyList[i],separator)
         local prefix = policy[1]..separator..policy[2]..separator..policy[3]
         local divtypeKey =  table.concat({prefix, fields.divtype}, separator)
 

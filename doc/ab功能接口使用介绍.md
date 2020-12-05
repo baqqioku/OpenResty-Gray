@@ -170,7 +170,7 @@ ab管理接口
         * 参数：policyid: 获取第policyid号策略
         * 返回值：{"desc":"success ","code":200,"data":{"divdata":["1","beta1","3","beta2","5","beta1","0","beta3"],"divtype":"uidsuffix"}} 返回值中data部分是读取的策略数据，json格式。
 
-* 5.从系统删除策略                    
+* 5.从系统获取策略列表                  
     * curl localhost:port/ab_admin?action=policy_list
   
     * 接口说明:    
@@ -232,6 +232,13 @@ ab管理接口
             ]
         }
         
+* 4.从系统刪除策略                    
+    * curl localhost:port/ab_admin?action=policy_del&policyid=20
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作
+        * 参数：policyid: 获取第policyid号策略
+        * 返回值：{"desc":"success ","code":200} json格式。
 
 
 * 6.检查策略组是否合法                    
