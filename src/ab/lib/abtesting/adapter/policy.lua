@@ -10,6 +10,7 @@ local ERRORINFO = require('abtesting.error.errcode').info
 local fields    = require('abtesting.utils.init').fields
 local utils         = require('abtesting.utils.utils')
 local cjson         = require('cjson.safe')
+local pageMod       = require('abtesting.utils.page')
 
 
 local separator = ':'
@@ -162,12 +163,15 @@ _M.get = function(self, id)
     return policy
 end
 
-_M.list = function(self)
+_M.list = function(self,page,size)
     local database = self.database
     local baseLibrary  = self.baseLibrary
     local policyKey      = table.concat({baseLibrary, '*'}, separator)
     local idCountKey =  table.concat({baseLibrary, fields.idCount}, separator)
-
+    local page = page or 1
+    local size = size or 20
+    local startIndex = (page-1)*size + 1
+    local endIndex = page*size
 
     local policys, err = database:keys(policyKey)
     if not policys or type(policys) ~= 'table' then
@@ -206,9 +210,21 @@ _M.list = function(self)
         end
     end
 
-    ngx.log(ngx.DEBUG,cjson.encode(ret))
+    local maxIndex = #ret
+    if endIndex > maxIndex then
+        endIndex = maxIndex
+    end
+    local k = 1
+    local result = {}
+    for i=startIndex,endIndex do
+        result[k] = ret[i]
+        k = k +1
+    end
 
-    return ret
+    local pageMod = pageMod:new(page,size,#ret,result)
+    local page = pageMod:page()
+    ngx.log(ngx.DEBUG,cjson.encode(page))
+    return page
 end
 
 return _M

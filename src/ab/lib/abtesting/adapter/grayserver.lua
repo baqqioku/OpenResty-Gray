@@ -131,7 +131,6 @@ _M.pageList = function(self,page,size)
     local startIndex = (page-1)*size + 1
     local endIndex = page*size
 
-    ngx.log(ngx.DEBUG,startIndex,endIndex)
 
     local grayServer = {}
     local hkeys = {}

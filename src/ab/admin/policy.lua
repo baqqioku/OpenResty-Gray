@@ -309,10 +309,11 @@ end
 
 _M.list = function(option)
     local db = option.db
-
+    local page = ngx.var.arg_page
+    local size = ngx.var.arg_size
     local pfunc = function()
         local policyIO = policyModule:new(db.redis, policyLib)
-        return policyIO:list()
+        return policyIO:list(page,size)
     end
     local status, info = xpcall(pfunc, handler)
     if not status then
