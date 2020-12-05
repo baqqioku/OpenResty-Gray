@@ -187,21 +187,22 @@ _M.list = function(self)
         end
     end
     ngx.log(ngx.DEBUG,cjson.encode(policyList))
-
-    for i=1,#policyList/2 do
+    local  j = 1;
+    for i=1,#policyList do
         local policy = utils.split(policyList[i],separator)
+        ngx.log(ngx.DEBUG,cjson.encode(policy))
         local prefix = policy[1]..separator..policy[2]..separator..policy[3]
         local divtypeKey =  table.concat({prefix, fields.divtype}, separator)
-
-        local result = {}
-        local ok,err = database:get(divtypeKey)
-        if ok then
-            result.divtype = ok
+        if divtypeKey == policyList[i] then
+            local result = {}
+            local ok,err = database:get(divtypeKey)
+            if ok then
+                result.divtype = ok
+            end
+            result.policyId = tonumber(policy[3])
+            ngx.log(ngx.DEBUG,cjson.encode(result))
+            ret[j] = result
         end
-        result.policyId = tonumber(policy[3])
-        ngx.log(ngx.DEBUG,cjson.encode(result))
-
-        ret[i] = result
     end
 
     ngx.log(ngx.DEBUG,cjson.encode(ret))
