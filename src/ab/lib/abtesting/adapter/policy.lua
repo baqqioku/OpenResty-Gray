@@ -202,6 +202,7 @@ _M.list = function(self)
             result.policyId = tonumber(policy[3])
             ngx.log(ngx.DEBUG,cjson.encode(result))
             ret[j] = result
+            j = j +1
         end
     end
 
