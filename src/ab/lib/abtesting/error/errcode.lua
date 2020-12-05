@@ -43,7 +43,7 @@ _M.info = {
 
     ['DOACTION_ERROR']	        = { 50501, 'error during action of '},
 
-    ['GRAYSERVER_INVALID_ERROR'] = { 50701, 'gray server invalid for '},
+    ['GRAYSERVER_INVALID_ERROR'] = { 50701, 'gray server  invalid for '},
 
     ['GRAYSERVER_INPUT_ERROR']	 = { 50702, 'gray server input error for '},
     

@@ -149,8 +149,6 @@ _M.pageList = function(self,page,size)
     end
 
     for k,v in pairs(hkeys) do
-        ngx.log(ngx.DEBUG,hkeys[k])
-        ngx.log(ngx.DEBUG,k)
         local serverSwitch,err = database:hget(baseLibrary,hkeys[k])
         if not serverSwitch then error{ERRORINFO.REDIS_ERROR, err} end
         local single = {}
@@ -163,6 +161,16 @@ _M.pageList = function(self,page,size)
     local page = pageMod:page()
     ngx.log(ngx.DEBUG,cjson.encode(page))
     return page
+end
+
+_M.update = function(self,grayServer,switch)
+    local database  = self.database
+    local baseLibrary = self.baseLibrary
+    local ok,err = database:hset(baseLibrary,grayServer,switch)
+    if ok then
+        return  grayServer
+    end
+    return nil
 end
 
 

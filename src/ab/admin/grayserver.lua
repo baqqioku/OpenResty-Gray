@@ -233,6 +233,59 @@ _M.pageList = function(option)
     end
 end
 
+local getGrayServerName = function()
+    local server_name = ngx.var.arg_server_name
+    local switch = ngx.var.arg_switch
+    if not server_name and not switch then
+        local info = ERRORINFO.GRAYSERVER_INVALID_ERROR
+        local desc = "server_name or  switch "
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+    return server_name
+end
+
+_M.update = function(option)
+    local db = option.db
+
+    local server_name = ngx.var.arg_server_name
+    local switch = ngx.var.arg_switch
+    if not server_name or not switch then
+        local info = ERRORINFO.GRAYSERVER_INVALID_ERROR
+        local desc = "server_name or  switch "
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    local grayServerMod = grayServerModule:new(db.redis, grayserverLib)
+    local pfunc = function()
+        return grayServerMod:update(server_name,switch)
+    end
+
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    else
+        ngx.log(ngx.DEBUG,ngx.var.kv_gray)
+        local grayServerCache  = cache:new(ngx.var.kv_gray)
+        grayServerCache:setGrayServerSwitch(server_name,switch)
+    end
+
+    local data
+    if info then
+        data = info
+    end
+
+    local response = doresp(ERRORINFO.SUCCESS, _, data)
+    ngx.say(response)
+    return true
+end
 
 
 return _M

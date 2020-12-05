@@ -432,7 +432,7 @@ ab管理接口
         }
         
 * 17.灰度服务更新
-    * curl  localhost:port/ab_admin?action=grayserver_update -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
+    * curl  localhost:8080/ab_admin?action=grayserver_update&server_name=abc&switch=off
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作，新增灰度服务开关 grayserver_update
@@ -440,10 +440,7 @@ ab管理接口
         {
             "desc": "success ",
             "code": 200,
-            "data": [
-                "gray server abc",
-                "gray server driver"
-            ]
+            "data": "abc"
         }        
 
 * 18.灰度服务删除
