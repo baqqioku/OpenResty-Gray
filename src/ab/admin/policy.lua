@@ -145,7 +145,7 @@ _M.set = function(option)
     if not policy then
         return false
     end
-
+    local policyMod
     local pfunc = function() 
         policyMod = policyModule:new(db.redis, policyLib)
         return policyMod:check(policy)
@@ -201,9 +201,9 @@ _M.update = function(option)
     if not policy then
         return false
     end
-
+    local policyMod
     local pfunc = function()
-        policyMod = policyModule:new(db.redis, policyLib)
+         policyMod = policyModule:new(db.redis, policyLib)
         return policyMod:check(policy)
     end
 
