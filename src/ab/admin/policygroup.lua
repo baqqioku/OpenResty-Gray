@@ -349,4 +349,30 @@ _M.list = function(option)
     return true
 end
 
+_M.del = function(option)
+    local db = option.db
+
+    local policyGroupId = getPolicyGroupId()
+    if not policyGroupId then
+        return false
+    end
+
+    local pfunc = function()
+        local policyGroupMod = policyGroupModule:new(db.redis,
+                policyGroupLib, policyLib)
+        return policyGroupMod:del(policyGroupId)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+    local response = doresp(ERRORINFO.SUCCESS)
+    ngx.say(response)
+    return true
+end
+
+
+
 return _M
