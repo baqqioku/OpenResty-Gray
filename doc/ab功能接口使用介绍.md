@@ -12,6 +12,7 @@ ab管理接口
 * /ab_admin?action=policy_del
 * /ab_admin?action=policy_update
 * /ab_admin?action=policy_list
+* /ab_admin?action=policy_pageList
 
 #策略组管理（用于多级分流）
 * /ab_admin?action=policygroup_check
@@ -19,6 +20,7 @@ ab管理接口
 * /ab_admin?action=policygroup_get
 * /ab_admin?action=policygroup_del
 * /ab_admin?action=policygroup_list
+* /ab_admin?action=policygroup_adminSet
 
 #灰度服务管理
 * /ab_admin?action= grayserver.set
@@ -288,11 +290,19 @@ ab管理接口
 
 
 * 8.向系统添加策略组                    
-    * curl   localhost:port/ab_admin?action=policygroup_set -d '{"1":{"divtype":"uidappoint","divdata":[{"uidset":[1234,5124,653],"upstream":"beta1"},{"uidset":[3214,652,145],"upstream":"beta2"}]},"2":{"divtype":"iprange","divdata":[{"range":{"start":1111,"end":2222},"upstream":"beta1"},{"range":{"start":3333,"end":4444},"upstream":"beta2"},{"range":{"start":7777,"end":8888},"upstream":"beta3"}]}}
+    * curl   localhost:port/ab_admin?action=policygroup_adminSet -d '{"policyids":[5,9,1]}'
   
     * 接口说明:    
         * action: 代表要执行的操作
         * 仅接受POST方法，POST数据为待检查策略的json字符串
+          提交的报文
+               {
+                   "policyids": [
+                       5,
+                       9,
+                       1
+                   ]
+               }  
         * 返回值：{"desc":"success ","code":200,"data":{"groupid":2,"group":[11,12]}}，策略组添加成功，返回策略组号groupid是2，组中包括两个策略，策略id分别是11和12.
 
 * 9.从系统读取策略组                    
