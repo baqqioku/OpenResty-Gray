@@ -334,7 +334,7 @@ _M.pageList = function(option)
     local size = ngx.var.arg_size
     local pfunc = function()
         local policyIO = policyModule:new(db.redis, policyLib)
-        return policyIO:list(page,size)
+        return policyIO:pageList(page,size)
     end
     local status, info = xpcall(pfunc, handler)
     if not status then
