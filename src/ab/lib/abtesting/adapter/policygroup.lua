@@ -111,6 +111,37 @@ _M.set = function(self, policyGroup)
     return ret
 end
 
+_M.adminSet = function(self, policyGroup)
+
+    local database = self.database
+    local baseLibrary = self.baseLibrary
+
+    local steps = #policyGroup
+    local group = {}
+    for idx = 1, steps do
+        local policy = policyGroup[idx]
+        group[idx] = policy
+    end
+
+    local groupLibrary  = self.groupLibrary
+    local groupid       = self:getIdCount()
+    local groupKey      = table.concat({groupLibrary, groupid}, separator)
+    ngx.log(ngx.DEBUG,"groupkey:"..groupKey) --debug groupKey when set
+    database:init_pipeline()
+    for idx = 1, steps do
+        database:rpush(groupKey, group[idx])
+    end
+    local ok, err = database:commit_pipeline()
+    if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+
+    local ret = {}
+    ret.groupid = groupid
+    ret.group = group
+
+    return ret
+end
+
+
 _M.check = function(self, policyGroup)
 
     local steps = #policyGroup

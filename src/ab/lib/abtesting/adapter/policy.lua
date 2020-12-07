@@ -168,6 +168,54 @@ _M.list = function(self,page,size)
     local baseLibrary  = self.baseLibrary
     local policyKey      = table.concat({baseLibrary, '*'}, separator)
     local idCountKey =  table.concat({baseLibrary, fields.idCount}, separator)
+
+    local policys, err = database:keys(policyKey)
+    if not policys or type(policys) ~= 'table' then
+        error{ERRORINFO.REDIS_ERROR, err}
+    end
+    ngx.log(ngx.DEBUG,cjson.encode(policys))
+
+    local ret = {}
+    local policyList = {}
+    local k=1
+    for i=1,#policys do
+        if policys[i] == idCountKey then
+            --continue
+        else
+            policyList[k] = policys[i]
+            k = k+1
+        end
+    end
+    ngx.log(ngx.DEBUG,cjson.encode(policyList))
+    local  j = 1;
+    for i=1,#policyList do
+        local policy = utils.split(policyList[i],separator)
+        ngx.log(ngx.DEBUG,cjson.encode(policy))
+        local prefix = policy[1]..separator..policy[2]..separator..policy[3]
+        local divtypeKey =  table.concat({prefix, fields.divtype}, separator)
+        if divtypeKey == policyList[i] then
+            local result = {}
+            local ok,err = database:get(divtypeKey)
+            if ok then
+                result.divtype = ok
+            end
+            result.policyId = tonumber(policy[3])
+            ngx.log(ngx.DEBUG,cjson.encode(result))
+            ret[j] = result
+            j = j +1
+        end
+    end
+
+    ngx.log(ngx.DEBUG,cjson.encode(ret))
+    return ret
+end
+
+
+_M.pageList = function(self,page,size)
+    local database = self.database
+    local baseLibrary  = self.baseLibrary
+    local policyKey      = table.concat({baseLibrary, '*'}, separator)
+    local idCountKey =  table.concat({baseLibrary, fields.idCount}, separator)
     local page = page or 1
     local size = size or 20
     local startIndex = (page-1)*size + 1
@@ -226,5 +274,6 @@ _M.list = function(self,page,size)
     ngx.log(ngx.DEBUG,cjson.encode(page))
     return page
 end
+
 
 return _M

@@ -231,6 +231,80 @@ _M.set = function(option)
     return true
 end
 
+local getAdminGroup = function()
+    local request_body  = ngx.var.request_body
+    local postData      = cjson.decode(request_body)
+
+    if not request_body then
+        -- ERRORCODE.PARAMETER_NONE
+        local errinfo   = ERRORINFO.PARAMETER_NONE
+        local desc      = 'request_body or post data'
+        local response  = doresp(errinfo, desc)
+        log:errlog(dolog(errinfo, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    if not postData then
+        -- ERRORCODE.PARAMETER_ERROR
+        local errinfo   = ERRORINFO.PARAMETER_ERROR
+        local desc      = 'postData is not a json string'
+        local response  = doresp(errinfo, desc)
+        log:errlog(dolog(errinfo, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    local policy_cnt = 0
+    local policyGroup = {}
+    ngx.log(ngx.DEBUG,cjson.encode(postData))
+    local policyids = postData['policyids']
+
+    for k, v in pairs(policyids) do
+        policy_cnt = policy_cnt + 1
+        local idx = tonumber(k)
+        local policy = v
+        policyGroup[idx] =policy
+    end
+
+    if policy_cnt ~= #policyGroup then
+        local errinfo   = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc      = "index of policy in policy_group should be one by one"
+        local response  = doresp(errinfo, desc)
+        log:errlog(dolog(errinfo, desc))
+        ngx.say(response)
+        return nil
+    end
+    return policyGroup
+end
+
+
+_M.adminSet = function(option)
+    local db = option.db
+
+    local policyGroup = getAdminGroup()
+    if not policyGroup then
+        return false
+    end
+
+    local pfunc = function()
+        local policyGroupMod = policyGroupModule:new(db.redis, policyGroupLib, policyLib)
+        return policyGroupMod:adminSet(policyGroup)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    local data = info
+    local response = doresp(ERRORINFO.SUCCESS, _, data)
+    ngx.say(response)
+    return true
+
+end
+
 _M.get = function(option)
     local db = option.db
 

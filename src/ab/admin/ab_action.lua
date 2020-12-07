@@ -32,6 +32,7 @@ ab_action.policy_get    = policy.get
 ab_action.policy_del    = policy.del
 ab_action.policy_update = policy.update
 ab_action.policy_list   = policy.list
+ab_action.policy_pageList   = policy.pageList
 
 ab_action.runtime_set   = runtime.set
 ab_action.runtime_del   = runtime.del
@@ -40,9 +41,10 @@ ab_action.runtime_list  = runtime.list
 
 ab_action.policygroup_check  = policygroup.check
 ab_action.policygroup_set    = policygroup.set
+ab_action.policygroup_adminSet   = policygroup.adminSet
 ab_action.policygroup_get    = policygroup.get
 ab_action.policygroup_del    = policygroup.del
-ab_action.policygroup_list    = policygroup.list
+ab_action.policygroup_list   = policygroup.list
 
 
 ab_action.grayserver_set     = grayserver.set
