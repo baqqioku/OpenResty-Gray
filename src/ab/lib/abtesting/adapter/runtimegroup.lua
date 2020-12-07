@@ -217,17 +217,28 @@ _M.list = function(self)
         model.domain = _domain
         local prefix = baseLibrary .. ':' .. _domain
         local divSteps = divStepList[_domain]
-        local realModelName = {}
+        local modelNames = {}
+        local policys = {}
         for i = 1, divSteps do
             local idx = indices[i]
             local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
+            local divDataKey = table.concat({prefix, idx, fields.divDataKey}, separator)
             local ok,err = database:get(divModulenameKey)
+
             if ok then
                 local divtype = utils.split2(ok,".")[3]
-                realModelName[i] = divtype
+                modelNames[i] = divtype
             end
+
+            local ok,err = database:get(divDataKey)
+            if ok then
+                local policyId = utils.split2(ok,":")[3]
+                policys[i] = policyId
+            end
+
         end
-        model.divtypes = realModelName
+        model.divtypes = modelNames
+        model.policys = policys
         ret[k] = model
     end
     ngx.log(ngx.DEBUG,cjson.encode(ret))
