@@ -349,6 +349,27 @@ _M.list = function(option)
     return true
 end
 
+_M.pageList = function(option)
+    local db = option.db
+    local page = ngx.var.arg_page
+    local size = ngx.var.arg_size
+
+    local pfunc = function()
+        local policyGroupMod = policyGroupModule:new(db.redis, policyGroupLib, policyLib)
+        return policyGroupMod:pageList(page,size)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    local response = doresp(ERRORINFO.SUCCESS, nil, info)
+    ngx.say(response)
+    return true
+end
+
 _M.del = function(option)
     local db = option.db
 

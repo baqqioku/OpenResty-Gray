@@ -21,6 +21,7 @@ ab管理接口
 * /ab_admin?action=policygroup_del
 * /ab_admin?action=policygroup_list
 * /ab_admin?action=policygroup_adminSet
+* /ab_admin?action=policygroup_pageList
 
 #灰度服务管理
 * /ab_admin?action= grayserver.set
@@ -36,6 +37,7 @@ ab管理接口
 * /ab_admin?action=runtime_set
 * /ab_admin?action=runtime_del
 * /ab_admin?action=runtime_list
+* /ab_admin?action=runtime_pageList
 
 ```
 * 1.检查策略是否合法                    

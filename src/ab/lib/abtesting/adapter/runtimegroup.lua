@@ -15,6 +15,8 @@ local policyModule      = require('abtesting.adapter.policy')
 local policyGroupModule = require('abtesting.adapter.policygroup')
 local utils         = require('abtesting.utils.utils')
 local cjson         = require('cjson.safe')
+local pageMod       = require('abtesting.utils.page')
+
 
 
 local prefixConf        = systemConf.prefixConf
@@ -244,5 +246,100 @@ _M.list = function(self)
     ngx.log(ngx.DEBUG,cjson.encode(ret))
     return ret;
 end
+
+
+_M.pageList = function(self,page,size)
+    local database = self.database
+    local baseLibrary = self.baseLibrary
+    local allRuntime,err = database:keys(baseLibrary..'*')
+
+    local page = page or 1
+    local size = size or 20
+    local startIndex = (page-1)*size + 1
+    local endIndex = page*size
+
+    local ret = {}
+    if not allRuntime then
+        return ret
+    end
+
+    ngx.log(ngx.DEBUG,cjson.encode(allRuntime))
+
+
+    local domainList = {}
+    local i=1
+    for k,v in ipairs(allRuntime) do
+        local strList = utils.split(v,":")
+        if #strList>4 then
+            -- continue
+        else
+            domainList[i] = v
+            i = i+1;
+        end
+    end
+
+    local divStepList = {}
+    local realDomainList = {}
+
+    if #domainList >0 then
+        for k,v in ipairs(domainList) do
+            local str = utils.split(v,":")
+            realDomainList[k] = str[3]
+            local ok, err = database:get(v)
+            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+            local divstepsDomain = tonumber(ok)
+            divStepList[str[3]] = divstepsDomain
+        end
+    end
+
+    local i=1
+    for k,v in ipairs(realDomainList) do
+        local model = {}
+        local _domain = v
+        model.domain = _domain
+        local prefix = baseLibrary .. ':' .. _domain
+        local divSteps = divStepList[_domain]
+        local modelNames = {}
+        local policys = {}
+        for i = 1, divSteps do
+            local idx = indices[i]
+            local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
+            local divDataKey = table.concat({prefix, idx, fields.divDataKey}, separator)
+            local ok,err = database:get(divModulenameKey)
+
+            if ok then
+                local divtype = utils.split2(ok,".")[3]
+                modelNames[i] = divtype
+            end
+
+            local ok,err = database:get(divDataKey)
+            if ok then
+                local policyId = utils.split2(ok,":")[3]
+                policys[i] = policyId
+            end
+
+        end
+        model.divtypes = modelNames
+        model.policys = policys
+        ret[k] = model
+    end
+
+    local maxIndex = #ret
+    if endIndex > maxIndex then
+        endIndex = maxIndex
+    end
+    local k = 1
+    local result = {}
+    for i=startIndex,endIndex do
+        result[k] = ret[i]
+        k = k +1
+    end
+
+    local pageMod = pageMod:new(page,size,#ret,result)
+    local page = pageMod:page()
+    ngx.log(ngx.DEBUG,cjson.encode(page))
+    return page
+end
+
 
 return _M

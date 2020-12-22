@@ -256,6 +256,29 @@ _M.list = function(option)
 
 end
 
+_M.pageList = function(option)
+    local db = option.db
+
+    local page = ngx.var.arg_page
+    local size = ngx.var.arg_size
+    local grayfunc = function()
+        local runtimeGroupMod = runtimeGroupModule:new(db.redis, runtimeLib)
+        return runtimeGroupMod:pageList(page,size)
+    end
+
+    local status, info = xpcall(grayfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    else
+        local response = doresp(ERRORINFO.SUCCESS, nil, info)
+        log:info(dolog(ERRORINFO.SUCCESS, nil))
+        ngx.say(response)
+        return true
+    end
+end
+
 
 
 return _M
