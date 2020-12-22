@@ -289,9 +289,42 @@ ab管理接口
                   "code": 200,
                   "desc": "success "
               }
+              
+*8.获取系统策略组分页列表
+    * curl   localhost:port/ab_admin?action=policygroup_pageList&page=1&size=2
+    * 接口说明:    
+            * action: 代表要执行的操作
+            * 返回值：
+              {
+                  "code": 200,
+                  "desc": "success ",
+                  "data": {
+                      "pageSize": "2",
+                      "total": 5,
+                      "body": [
+                          {
+                              "groups": [
+                                  "5",
+                                  "9",
+                                  "1"
+                              ],
+                              "id": "4"
+                          },
+                          {
+                              "groups": [
+                                  "5",
+                                  "9",
+                                  "1"
+                              ],
+                              "id": "2"
+                          }
+                      ],
+                      "currentPage": "1"
+                  }
+              }
+              
 
-
-* 8.向系统添加策略组                    
+* 9.向系统添加策略组                    
     * curl   localhost:port/ab_admin?action=policygroup_adminSet -d '{"policyids":[5,9,1]}'
   
     * 接口说明:    
@@ -307,7 +340,7 @@ ab管理接口
                }  
         * 返回值：{"desc":"success ","code":200,"data":{"groupid":2,"group":[11,12]}}，策略组添加成功，返回策略组号groupid是2，组中包括两个策略，策略id分别是11和12.
 
-* 9.从系统读取策略组                    
+* 10.从系统读取策略组                    
     * curl  localhost:port/ab_admin?action=policygroup_get&policygroupid=2
   
     * 接口说明:    
@@ -315,7 +348,7 @@ ab管理接口
         * 参数：policyid: 获取第policygroupid号策略组
         * 返回值：{"desc":"success ","code":200,"data":{"groupid":2,"group":["11","12"]}} 返回值以json格式返回该组策略中包括哪些策略。
 
-* 10.从系统删除策略组                    
+* 11.从系统删除策略组                    
     * curl  localhost:port/ab_admin?action=policygroup_del&policygroupid=2
   
     * 接口说明:    
@@ -323,7 +356,7 @@ ab管理接口
         * 参数：policyid: 删除第policygroupid号策略组
         * 返回值：{"code":200,"desc":"success "}
         
- * 11.获取系统运行时策略列表         
+ * 12.获取系统运行时策略列表         
      * curl  localhost:port/ab_admin?action=runtime_list
    
      * 接口说明:    
@@ -358,9 +391,47 @@ ab管理接口
              ]
          }
          
-             
+ * 13.获取系统运行时策略分页列表         
+      * curl  localhost:port/ab_admin?action=runtime_pageList&page=1&size=2
+    
+      * 接口说明:    
+          * 参数：action: 代表要执行的操作
+          * 返回值：
+          {
+              "code": 200,
+              "desc": "success ",
+              "data": {
+                  "pageSize": "2",
+                  "total": 3,
+                  "body": [
+                      {
+                          "divtypes": [
+                              "token"
+                          ],
+                          "domain": "driverGateway-dev1.wsecar.com",
+                          "policys": [
+                              "0"
+                          ]
+                      },
+                      {
+                          "divtypes": [
+                              "uidsuffix",
+                              "arg_city",
+                              "iprange"
+                          ],
+                          "domain": "172.18.5.26",
+                          "policys": [
+                              "9",
+                              "10",
+                              "11"
+                          ]
+                      }
+                  ],
+                  "currentPage": "1"
+              }
+          }
 
-* 12.设置***策略***为系统的运行时策略，进行单级分流         
+* 14.设置***策略***为系统的运行时策略，进行单级分流         
     * curl  localhost:port/ab_admin?action=runtime_set&policyid=22&hostname=api.weibo.cn
   
     * 接口说明:    
@@ -370,7 +441,7 @@ ab管理接口
         * 返回值：{"code":200,"desc":"success "}
         * 注意：设置运行时信息的动作会导致原来数据库中的运行时信息删除，不论本次设置是否成功
 
-* 13.设置***策略组***为系统的运行时策略，进行多级分流
+* 15.设置***策略组***为系统的运行时策略，进行多级分流
     * curl  localhost:port/ab_admin?action=runtime_set&policygroupid=4&hostname=www.wscar.com
   
     * 接口说明:    
@@ -384,7 +455,7 @@ ab管理接口
         * 请注意：设置运行时信息的动作会导致原来数据库中的运行时信息删除，不论本次设置是否成功
 
 
-* 14.获取系统运行时信息 
+* 16.获取系统运行时信息 
     * curl  localhost:port/ab_admin?action=runtime_get&hostname=www.wscar.com
   
     * 接口说明:    
@@ -421,14 +492,14 @@ ab管理接口
         # divDataKey为运行时的分流策略名
 ```
 
-* 15.删除系统运行时信息                   
+* 17.删除系统运行时信息                   
     * curl  localhost:port/ab_admin?action=runtime_del&hostname=api.weibo.cn
   
     * 接口说明:    
         * 参数：action: 代表要执行的操作，删除系统运行时信息runtime_del
         * 返回值：{"code":200,"desc":"success "}
         
-* 16.灰度服务设置 
+* 18.灰度服务设置 
     * curl  localhost:port/ab_admin?action=grayserver_set -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
   
     * 接口说明:    
@@ -443,7 +514,7 @@ ab管理接口
             ]
         }
         
-* 17.灰度服务更新
+* 19.灰度服务更新
     * curl  localhost:8080/ab_admin?action=grayserver_update&server_name=abc&switch=off
   
     * 接口说明:    
@@ -455,7 +526,7 @@ ab管理接口
             "data": "abc"
         }        
 
-* 18.灰度服务删除
+* 20.灰度服务删除
     * curl  localhost:8080/ab_admin?action=grayserver_del&server_name=driver
   
     * 接口说明:    
@@ -467,7 +538,7 @@ ab管理接口
             "code": 200
         }  
         
-* 19.灰度服务查看
+* 21.灰度服务查看
              * curl  localhost:8080/ab_admin?action=grayserver_get&server_name=abc
            
              * 接口说明:    
@@ -483,7 +554,7 @@ ab管理接口
                      }
                  }
                  
-* 20.灰度服务列表
+* 22.灰度服务列表
     * curl  localhost:8080/ab_admin?action=grayserver_pageList&page=1&size=2
   
     * 接口说明:    
