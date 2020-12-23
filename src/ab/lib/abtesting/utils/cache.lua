@@ -13,7 +13,7 @@ local indices       = systemConf.indices
 local fields        = systemConf.fields
 
 local divConf       = systemConf.divConf
-local shdict_expire = divConf.shdict_expire or 60
+local shdict_expire = divConf.shdict_expire
 
 _M.new = function(self, sharedDict)
     if not sharedDict then
