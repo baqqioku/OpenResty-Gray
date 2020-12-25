@@ -248,9 +248,11 @@ _M.getUpstream = function(self, ip)
 
     for i = 1,#ips do
         local iprange = utils:split2(ips[i],',')
-        ngx.log(ngx.DEBUG,cjson.encode(iprange))
+
         local startIp = iprange[0]
         local endIp  = iprange[1]
+
+        ngx.log(ngx.DEBUG,startIp,',',endIp)
 
         if ip >= ip_parser.ip2long(startIp) and ip<= ip_parser.ip2long(endIp)  then
             local backend, err =  database:hget(policyLib,ips[i])
