@@ -6,6 +6,8 @@ _M._VERSION = "0.0.1"
 
 local ERRORINFO	= require('abtesting.error.errcode').info
 local ip_parser = require('abtesting.userinfo.ipParser')
+local cjson         = require('cjson.safe')
+
 
 local offset    = 0.3
 local k_start   = 'start'
@@ -224,7 +226,7 @@ _M.getUpstream = function(self, ip)
 
     local database, policyLib = self.database, self.policyLib
 
-    local val, err = database:hgetAll(policyLib)
+    local val, err = database:hgetall(policyLib)
     if not val then error{ERRORINFO.REDIS_ERROR, err} end
 
     local index_upstream = #val
@@ -236,15 +238,17 @@ _M.getUpstream = function(self, ip)
         k = k+1
         i = i+1
     end
+    ngx.log(ngx.DEBUG,cjson.encode(ips))
 
     local  upstream
 
     for i = 1,#ips do
         local iprange = string.find(ips[i],':')
-        local start = iprange[0]
+        ngx.log(ngx.DEBUG,cjson.encode(iprange))
+        local startIp = iprange[0]
         local endIp  = iprange[1]
 
-        if ip >= ip_parser.ip2long(start) and ip<= ip_parser.ip2long(endIp)  then
+        if ip >= ip_parser.ip2long(startIp) and ip<= ip_parser.ip2long(endIp)  then
             local backend, err =  database:hget(policyLib,ips[i])
             if not backend then
                 error{ERRORINFO.REDIS_ERROR, err}
