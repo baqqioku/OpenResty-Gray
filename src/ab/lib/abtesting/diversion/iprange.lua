@@ -245,7 +245,7 @@ _M.getUpstream = function(self, ip)
     local  upstream
 
     for i = 1,#ips do
-        local iprange = string.find(ips[i],':')
+        local iprange = string.find(ips[i],',')
         ngx.log(ngx.DEBUG,cjson.encode(iprange))
         local startIp = iprange[0]
         local endIp  = iprange[1]
