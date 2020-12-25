@@ -232,10 +232,13 @@ _M.getUpstream = function(self, ip)
     local index_upstream = #val
     local ips = {}
     local k = 1
+    local j = 1;
     for i=0,index_upstream do
-        local ip = val[i+1]
+        local ip = val[j]
         ips[k] = ip
         k = k+1
+        j=j+2
+        i=i+2
     end
     ngx.log(ngx.DEBUG,cjson.encode(ips))
 
