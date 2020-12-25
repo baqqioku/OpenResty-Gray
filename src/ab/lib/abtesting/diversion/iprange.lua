@@ -7,6 +7,8 @@ _M._VERSION = "0.0.1"
 local ERRORINFO	= require('abtesting.error.errcode').info
 local ip_parser = require('abtesting.userinfo.ipParser')
 local cjson         = require('cjson.safe')
+local utils         = require('abtesting.utils.utils')
+
 
 
 local offset    = 0.3
@@ -245,7 +247,7 @@ _M.getUpstream = function(self, ip)
     local  upstream
 
     for i = 1,#ips do
-        local iprange = string.find(ips[i],',')
+        local iprange = utils:split2(ips[i],',')
         ngx.log(ngx.DEBUG,cjson.encode(iprange))
         local startIp = iprange[0]
         local endIp  = iprange[1]
