@@ -247,7 +247,7 @@ _M.getUpstream = function(self, ip)
     local  upstream
 
     for i = 1,#ips do
-        local iprange = utils:split2(ips[i],',')
+        local iprange = utils:split(ips[i],',')
 
         local startIp = iprange[0]
         local endIp  = iprange[1]
