@@ -73,7 +73,7 @@ _M.check = function(self, policy)
     local last_edip
     for i, v in pairs(policy) do
         range, upstream = v[k_range], v[k_upstream]
-        stip = tonumber(ip_parser:ip2long(range['start']))
+        stip = tonumber(ip_parser.ip2long(range['start']))
         edip = tonumber(ip_parser.ip2long(range['end']))
 
         if type(upstream) ~= 'string' then
