@@ -19,7 +19,7 @@ uint32_t htonl(uint32_t hostlong);
 
 local C = ffi.C
 
-local ip2long = function(ip)
+ _M.ip2long = function(ip)
     local inp = ffi.new("struct in_addr[1]")
     if C.inet_aton(ip, inp) ~= 0 then
         return tonumber(C.ntohl(inp[0].s_addr))
@@ -27,7 +27,7 @@ local ip2long = function(ip)
     return nil
 end
 
-local long2ip = function(long)
+_M.long2ip = function(long)
     if type(long) ~= "number" then
         return nil
     end
@@ -40,8 +40,10 @@ end
 
 _M.get = function()
     local ClientIP = ngx.req.get_headers()["X-Real-IP"]
+    ngx.log(ngx.DEBUG,'ClientIP'..ClientIP)
     if ClientIP == nil then
         ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
+        ngx.log(ngx.DEBUG,'ClientIP'..ClientIP)
         if ClientIP then
             local colonPos = string.find(ClientIP, ' ')
             if colonPos then
@@ -53,7 +55,15 @@ _M.get = function()
         ClientIP = ngx.var.remote_addr
     end
     if ClientIP then 
-        ClientIP = ip2long(ClientIP)
+        ClientIP = _M.ip2long(ClientIP)
+    end
+    return ClientIP
+end
+
+_M.get_ip2long = function()
+    local ClientIP = _M.get()
+    if ClientIP then
+        ClientIP = _M.ip2long(ClientIP)
     end
     return ClientIP
 end
