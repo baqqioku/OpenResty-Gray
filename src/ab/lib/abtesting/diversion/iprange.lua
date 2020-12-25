@@ -164,7 +164,7 @@ end
 
 
 _M.get = function(self)
-    local database  = self.database 
+--[[    local database  = self.database
     local policyLib = self.policyLib
 
     local data, err = database:zrange(policyLib, 0, -1, 'withscores')
@@ -174,10 +174,17 @@ _M.get = function(self)
 	local n = #data
 	local policy = {}
 	for i = 1, n, 2 do
-		policy[data[i]] = data[i+1]
+		policy[data[i]]--[[ = data[i+1]
 	end
 
-    return policy 
+    return policy ]]
+    local database  = self.database
+    local policyLib = self.policyLib
+    --ngx.log(INFO,)
+    local data, err = database:hgetall(policyLib)
+    if not data then
+        error{ERRORINFO.REDIS_ERROR, err}
+    end
 end
 
 --[[_M.getUpstream = function(self, ip)
