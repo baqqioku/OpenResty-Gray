@@ -40,7 +40,7 @@ end
 
 _M.get = function()
     local ClientIP = ngx.req.get_headers()["X-Real-IP"]
-    ngx.log(ngx.DEBUG,'ClientIP'..ClientIP)
+    ngx.log(ngx.DEBUG,'ClientIP:',ClientIP)
     if ClientIP == nil then
         ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
         ngx.log(ngx.DEBUG,'ClientIP'..ClientIP)
