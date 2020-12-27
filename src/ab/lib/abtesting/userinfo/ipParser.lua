@@ -40,10 +40,8 @@ end
 
 _M.get = function()
     local ClientIP = ngx.req.get_headers()["X-Real-IP"]
-    ngx.log(ngx.DEBUG,'ClientIP:',ClientIP)
     if ClientIP == nil then
         ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
-        ngx.log(ngx.DEBUG,'ClientIP',ClientIP)
         if ClientIP then
             local colonPos = string.find(ClientIP, ' ')
             if colonPos then
@@ -54,8 +52,9 @@ _M.get = function()
     if ClientIP == nil then
         ClientIP = ngx.var.remote_addr
     end
+    ngx.log(ngx.DEBUG,'ClientIP',ClientIP)
     if ClientIP then 
-        ClientIP = _M.ip2long(ClientIP)
+        --ClientIP = _M.ip2long(ClientIP)
     end
     return ClientIP
 end
