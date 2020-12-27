@@ -150,6 +150,33 @@ ab管理接口
               }
           ]
       }
+
+
+      5.添加 ip范围分流策略
+            curl  server:port/ab_admin?action=policy_set
+      
+            提交报文
+            
+            {
+                "divtype": "iprange",
+                "divdata": [
+                    {
+                        "range": {
+                            "start": "127.0.0.5",
+                            "end": "127.0.0.6"
+                        },
+                        "upstream": "beta1"
+                    },
+                    {
+                        "range": {
+                            "start": "127.0.0.3",
+                            "end": "127.0.0.4"
+                        },
+                        "upstream": "beta2"
+                    }
+                ]
+            }
+
     
     
    
