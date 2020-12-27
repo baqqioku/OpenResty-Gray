@@ -54,7 +54,7 @@ _M.get = function()
     end
     ngx.log(ngx.DEBUG,'ClientIP',ClientIP)
     if ClientIP then 
-        --ClientIP = _M.ip2long(ClientIP)
+        ClientIP = _M.ip2long(ClientIP)
     end
     return ClientIP
 end
