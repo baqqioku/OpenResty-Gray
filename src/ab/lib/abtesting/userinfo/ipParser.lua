@@ -43,7 +43,7 @@ _M.get = function()
     ngx.log(ngx.DEBUG,'ClientIP:',ClientIP)
     if ClientIP == nil then
         ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
-        ngx.log(ngx.DEBUG,'ClientIP'..ClientIP)
+        ngx.log(ngx.DEBUG,'ClientIP',ClientIP)
         if ClientIP then
             local colonPos = string.find(ClientIP, ' ')
             if colonPos then
