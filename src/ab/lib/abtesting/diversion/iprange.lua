@@ -247,6 +247,8 @@ _M.getUpstream = function(self, ip)
     local  upstream
 
     for i = 1,#ips do
+        ngx.log(ngx.DEBUG,ips[i])
+
         local iprange = utils:split(ips[i],',')
 
         local startIp = iprange[0]
