@@ -189,6 +189,7 @@ _M.get = function(self)
     if not data then
         error{ERRORINFO.REDIS_ERROR, err}
     end
+    return data
 end
 
 --[[_M.getUpstream = function(self, ip)
