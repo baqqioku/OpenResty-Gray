@@ -175,11 +175,11 @@ local loadGrayServer = function()
 
     local grayMod = grayServerModule:new(db.redis, grayServerPrefix)
     local grayServer = grayMod:get(grayServerName)
-    local graySwitch = 'off'
+    local graySwitch = 'on'
     if  not grayServer.name and not grayServer.switch then
         log:debug('fetch grayserver [', grayServerName, '] from redis db, get [nil]')
         grayServerCache:setGrayServerSwitch(grayServerName,graySwitch)
-        return false,graySwitch
+        return true,graySwitch
     else
         graySwitch = grayServer.switch
         grayServerCache:setGrayServerSwitch(grayServerName,graySwitch)
