@@ -3,7 +3,7 @@ local _M = {}
 
 _M._VERSION = '0.0.1'
 
-_M.redisConf = {
+--[[_M.redisConf = {
     ["uds"]      = ngx.var.redis_uds,
     ["host"]     = ngx.var.redis_host,
     ["port"]     = ngx.var.redis_port,
@@ -12,18 +12,18 @@ _M.redisConf = {
     ["timeout"]  = ngx.var.redis_connect_timeout,
     ["dbid"]     = ngx.var.redis_dbid,
     ["auth"]     = ngx.var.redis_auth
-}
-
---[[_M.redisConf = {
-    ["uds"]      = '/var/run/redis.sock',
-    ["host"]     = '192.168.126.130',
-    ["port"]     = '6379',
-    ["poolsize"] = 10000,
-    ["idletime"] = 90000 ,
-    ["timeout"]  = 10000,
-    ["dbid"]     = 0,
-    ["auth"]     = '123'
 }]]
+
+_M.redisConf = {
+    --["uds"]      = '/var/run/redis.sock',
+    ["host"]     = '172.18.5.110',
+    ["port"]     = '6379',
+    ["poolsize"] = 20000,
+    ["idletime"] = 90000 ,
+    ["timeout"]  = 3000,
+    ["dbid"]     = 0,
+    ["auth"]     = 'Yq0wHk5AmlpJ0lEleO5zsMNN6npXOQ'
+}
 
 _M.divtypes = {
     ["iprange"]     = 'ipParser',  
