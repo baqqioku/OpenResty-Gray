@@ -263,6 +263,7 @@ _M.list = function(self)
         ret[i] = result
     end
 
+    table.sort(ret, function(n1, n2) return tonumber(n1['id']) < tonumber(n2['id']) end)
     return ret
 end
 
@@ -309,6 +310,8 @@ _M.pageList = function(self,page,size)
         ret[i] = result
     end
 
+    table.sort(ret, function(n1, n2) return tonumber(n1['id']) < tonumber(n2['id']) end)
+
     local maxIndex = #ret
     if endIndex > maxIndex then
         endIndex = maxIndex
@@ -319,6 +322,7 @@ _M.pageList = function(self,page,size)
         result[k] = ret[i]
         k = k +1
     end
+
 
     local pageMod = pageMod:new(page,size,#ret,result)
     local page = pageMod:page()
