@@ -40,16 +40,25 @@ end
 
 _M.get = function()
     local ClientIP = ngx.req.get_headers()["X-Real-IP"]
-    if ClientIP == nil then
-        ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
+    if ClientIP == nil or string.len(ClientIP) == 0 or ClientIP == "unknown" then
+--[[        ClientIP = ngx.req.get_headers()["X-Forwarded-For"]
         if ClientIP then
             local colonPos = string.find(ClientIP, ' ')
+            local proxy_ip_list = ngx.var.proxy_add_x_forwarded_for
             if colonPos then
                 ClientIP = string.sub(ClientIP, 1, colonPos - 1) 
             end
+        end]]
+        local proxy_ip_list = ngx.var.proxy_add_x_forwarded_for
+
+        if proxy_ip_list then
+            local clientipEnd = string.find(proxy_ip_list, ',', 1)
+            if clientipEnd then
+                ClientIP = string.sub(proxy_ip_list, 0, clientipEnd - 1)
+            end
         end
     end
-    if ClientIP == nil then
+    if ClientIP == nil or string.len(ClientIP) == 0 or ClientIP == "unknown" then
         ClientIP = ngx.var.remote_addr
     end
     ngx.log(ngx.DEBUG,'ClientIP:',ClientIP)
