@@ -291,7 +291,7 @@ local ok, status, steps, runtimeInfo = xpcall(pfunc, handler)
 --ngx.log(ngx.DEBUG," ",ok," ",status," ",steps)
 if not ok then
     -- execute error, the type of status is table now
-    log:errlog("getruntime\t", "error\t")
+    log:errlog("get runtime\t", "error\t")
     return doerror(status, getRewriteInfo())
 else
 	local info = 'getRuntimeInfo error: '
@@ -348,7 +348,7 @@ local upPfunc = function()
 
     --step 1: read frome cache, but error
     log:debug("获取策略级数:"..divsteps)
-    local upstable = upstreamCache:getUpstream(divsteps, usertable)
+    local upstable = upstreamCache:getUpstream(hostname,divsteps, usertable)
 	log:debug('first fetch: upstable in cache ', cjson.encode(upstable))
     for i = 1, divsteps do
         local idx = indices[i]
@@ -388,7 +388,7 @@ local upPfunc = function()
     end
 
     -- setp 3: read from cache again
-    local upstable = upstreamCache:getUpstream(divsteps, usertable)
+    local upstable = upstreamCache:getUpstream(hostname,divsteps, usertable)
 	log:debug('second fetch: upstable in cache\t', cjson.encode(upstable))
     for i = 1, divsteps do
         local idx = indices[i]
@@ -427,13 +427,13 @@ local upPfunc = function()
             --缓存找不到 ，这里 请求了策略 getUpstream()，从redis读取
             local upstream = getUpstream(runtime, database, info)
             if not upstream then
-                upstreamCache:setUpstream(info, -1)
+                upstreamCache:setUpstream(hostname,info, -1)
 				log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
             else
                 if sem then upsSema:post(1) end
                 if red then setKeepalive(red) end
 
-                upstreamCache:setUpstream(info, upstream)
+                upstreamCache:setUpstream(hostname,info, upstream)
 				log:debug('fetch userinfo [', info, '] from redis db, get [', upstream, ']')
 
 				local info = "get upstream ["..upstream.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in db"

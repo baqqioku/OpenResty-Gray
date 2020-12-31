@@ -14,6 +14,7 @@ local fields        = systemConf.fields
 
 local divConf       = systemConf.divConf
 local shdict_expire = divConf.shdict_expire
+local separator = ":"
 
 _M.new = function(self, sharedDict)
     if not sharedDict then
@@ -102,7 +103,7 @@ _M.setRuntime = function(self, hostname, divsteps, runtimegroup)
     return true
 end
 
-_M.getUpstream = function(self, divsteps, usertable)
+_M.getUpstream = function(self,hostname, divsteps, usertable)
     local upstable = {}
     local cache = self.cache
     for i = 1, divsteps do
@@ -112,17 +113,20 @@ _M.getUpstream = function(self, divsteps, usertable)
         --info 获取到了实际的 uid 值
         -- ups will be an actually value or nil
         if info then
-            local ups   = cache:get(info)
+            local key = hostname..separator..info
+            ngx.log(ngx.DEBUG,"获取拼接后的 upstream 键值: ",key)
+            local ups   = cache:get(key)
             upstable[idx] = ups
         end
     end
     return upstable
 end
 
-_M.setUpstream = function(self, info, upstream)
+_M.setUpstream = function(self,hostname, info, upstream)
     local cache  = self.cache
     local expire = shdict_expire
-    cache:set(info, upstream, expire)
+    local prefix = hostname..separator..info
+    cache:set(prefix, upstream, expire)
 end
 
 _M.setGrayServer = function(self, grayServer)
