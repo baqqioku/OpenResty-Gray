@@ -206,6 +206,8 @@ _M.list = function(self,page,size)
         end
     end
 
+    table.sort(ret, function(n1, n2) return tonumber(n1['policyId']) < tonumber(n2['policyId']) end)
+
     ngx.log(ngx.DEBUG,cjson.encode(ret))
     return ret
 end
@@ -238,6 +240,8 @@ _M.pageList = function(self,page,size)
             k = k+1
         end
     end
+
+
     ngx.log(ngx.DEBUG,cjson.encode(policyList))
     local  j = 1;
     for i=1,#policyList do
@@ -268,6 +272,8 @@ _M.pageList = function(self,page,size)
         result[k] = ret[i]
         k = k +1
     end
+
+    table.sort(result, function(n1, n2) return tonumber(n1['policyId']) < tonumber(n2['policyId']) end)
 
     local pageMod = pageMod:new(page,size,#ret,result)
     local page = pageMod:page()

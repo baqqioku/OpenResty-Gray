@@ -52,7 +52,7 @@ _M.get = function()
     if ClientIP == nil then
         ClientIP = ngx.var.remote_addr
     end
-    ngx.log(ngx.DEBUG,'ClientIP',ClientIP)
+    ngx.log(ngx.DEBUG,'ClientIP:',ClientIP)
     if ClientIP then 
         ClientIP = _M.ip2long(ClientIP)
     end
