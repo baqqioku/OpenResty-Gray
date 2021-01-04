@@ -54,7 +54,9 @@ end
 
 local getHost = function()
     local host = ngx.req.get_headers()['Host']
-    if not host then return nil end
+    if not host then
+        return nil
+    end
     local hostkey = ngx.var.hostkey
     if hostkey then
         return hostkey

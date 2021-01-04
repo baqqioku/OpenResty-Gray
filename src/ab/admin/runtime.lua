@@ -16,6 +16,9 @@ local utils         = require('abtesting.utils.utils')
 local log			= require('abtesting.utils.log')
 local ERRORINFO     = require('abtesting.error.errcode').info
 
+local cache         = require('abtesting.utils.cache')
+
+
 local prefixConf    = systemConf.prefixConf
 local runtimeLib    = prefixConf.runtimeInfoPrefix
 local policyLib     = prefixConf.policyLibPrefix
@@ -108,6 +111,9 @@ _M.del = function(option)
     ngx.say(response)
     return true
 end
+
+
+
 
 --- 根据请求提供的运行数据，设置新的运行时信息
 --- 可以使用策略id，也可以使用策略组id
