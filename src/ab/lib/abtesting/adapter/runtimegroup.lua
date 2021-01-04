@@ -250,6 +250,9 @@ _M.list = function(self)
         model.policys = policys
         ret[k] = model
     end
+
+    table.sort(ret, function(n1, n2) return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1]) end)
+
     ngx.log(ngx.DEBUG,cjson.encode(ret))
     return ret;
 end
@@ -330,6 +333,8 @@ _M.pageList = function(self,page,size)
         model.policys = policys
         ret[k] = model
     end
+
+    table.sort(ret, function(n1, n2) return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1]) end)
 
     local maxIndex = #ret
     if endIndex > maxIndex then
