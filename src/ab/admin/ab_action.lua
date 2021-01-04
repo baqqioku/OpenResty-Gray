@@ -39,6 +39,7 @@ ab_action.runtime_del   = runtime.del
 ab_action.runtime_get   = runtime.get
 ab_action.runtime_list  = runtime.list
 ab_action.runtime_pageList  = runtime.pageList
+ab_action.changeStatus  = runtime.changeStatus
 
 ab_action.policygroup_check  = policygroup.check
 ab_action.policygroup_set    = policygroup.set

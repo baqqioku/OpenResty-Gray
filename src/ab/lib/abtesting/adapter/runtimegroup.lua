@@ -127,6 +127,13 @@ _M.get = function(self, domain)
         return ret
     end
 
+    local status = prefix .. ':' .. fields.status
+    ngx.log(ngx.DEBUG,status..'  ',domain)
+    local ok, err = database:get(status)
+    if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+
+    local status = tonumber(ok)
+
     local runtimeGroup = {}
     for i = 1, divsteps do
         local idx = indices[i]
@@ -139,7 +146,7 @@ _M.get = function(self, domain)
 
         runtimeGroup[idx] = rtInfo
     end
-
+    ret.status = status
     ret.divsteps = divsteps
     ret.runtimegroup = runtimeGroup
     return ret
@@ -243,6 +250,9 @@ _M.list = function(self)
         model.policys = policys
         ret[k] = model
     end
+
+    table.sort(ret, function(n1, n2) return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1]) end)
+
     ngx.log(ngx.DEBUG,cjson.encode(ret))
     return ret;
 end
@@ -323,6 +333,8 @@ _M.pageList = function(self,page,size)
         model.policys = policys
         ret[k] = model
     end
+
+    table.sort(ret, function(n1, n2) return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1]) end)
 
     local maxIndex = #ret
     if endIndex > maxIndex then

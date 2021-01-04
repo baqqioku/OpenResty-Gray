@@ -47,6 +47,13 @@ _M.getSteps = function(self, hostname)
     return tonumber(divsteps)
 end
 
+_M.getStatus = function(self, hostname)
+    local cache = self.cache
+    local k_status    = runtimeLib..':'..hostname..':'..fields.status
+    local status      = cache:get(k_status)
+    return tonumber(status)
+end
+
 _M.getRuntime = function(self, hostname, divsteps)
     local cache = self.cache
     local runtimegroup = {}

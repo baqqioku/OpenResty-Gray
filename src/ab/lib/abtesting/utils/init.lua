@@ -81,7 +81,8 @@ _M.fields = {
     ['divtype']             = 'divtype',
     ['divdata']             = 'divdata',
     ['idCount']             = 'idCount',
-    ['divsteps']            = 'divsteps'
+    ['divsteps']            = 'divsteps',
+    ['status']              = 'status'
 }
 
 _M.loglv = {

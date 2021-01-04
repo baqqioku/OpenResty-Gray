@@ -285,6 +285,55 @@ _M.pageList = function(option)
     end
 end
 
+_M.changeStatus = function(option, policyId,status)
+    local db = option.db
+    local database = db.redis
+    local hostname = getHostName()
+
+    if not hostname or string.len(hostname) < 1 or hostname == ngx.null then
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = 'arg hostname invalid: '
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
+
+    local pfunc = function()
+        local policyMod = policyModule:new(database, policyLib)
+        local policy = policyMod:get(policyId)
+
+        local divtype = policy.divtype
+        local divdata = policy.divdata
+
+        if divtype == ngx.null or divdata == ngx.null then
+            error{ERRORINFO.POLICY_BLANK_ERROR, 'policy NO '..policyId}
+        end
+
+        if not divtypes[divtype] then
+
+        end
+
+        local statusPrefix = hostname .. ':status'
+
+        local statusKey           = runtimeLib .. ':' .. statusPrefix .. ':' .. fields.status
+        local ok, err = database:set(statusKey, status)
+        if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+    end
+
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    local response = doresp(ERRORINFO.SUCCESS)
+    ngx.say(response)
+    return true
+end
+
 
 
 return _M
