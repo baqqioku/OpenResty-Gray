@@ -130,9 +130,13 @@ _M.get = function(self, domain)
     local status = prefix .. ':' .. fields.status
     ngx.log(ngx.DEBUG,status..'  ',domain)
     local ok, err = database:get(status)
-    if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+    if not ok then
+        error{ERRORINFO.REDIS_ERROR, err}
+    elseif ok == ngx.null then
+        ok = 1
+    end
 
-    local status = tonumber(ok)
+    local runtimeStatus = tonumber(ok)
 
     local runtimeGroup = {}
     for i = 1, divsteps do
@@ -146,7 +150,7 @@ _M.get = function(self, domain)
 
         runtimeGroup[idx] = rtInfo
     end
-    ret.status = status
+    ret.status = runtimeStatus
     ret.divsteps = divsteps
     ret.runtimegroup = runtimeGroup
     return ret
