@@ -54,7 +54,7 @@ _M.getStatus = function(self, hostname)
     return tonumber(status)
 end
 
-_M.getRuntime = function(self, hostname, divsteps)
+_M.getRuntime = function(self, hostname, divsteps,status)
     local cache = self.cache
     local runtimegroup = {}
     local prefix = runtimeLib .. ':' .. hostname
@@ -79,6 +79,7 @@ _M.getRuntime = function(self, hostname, divsteps)
         runtimegroup[idx] = runtime
     end
 
+    runtimegroup.status = tonumber(status)
     return true, runtimegroup
 
 end
