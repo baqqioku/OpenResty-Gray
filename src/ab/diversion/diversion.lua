@@ -195,6 +195,8 @@ local loadGrayServer = function()
     return true, graySwitch
 end
 
+
+
 -- getRuntimeInfo from cache or db
 local pfunc = function()
 
@@ -225,10 +227,11 @@ local pfunc = function()
     local runtimeCache  = cache:new(ngx.var.sysConfig)
     --step 1: read frome cache, but error
     local divsteps = runtimeCache:getSteps(hostname)
-    if not divsteps then
+    local status   = runtimeCache:getStatus(hostname)
+    if not divsteps and not status then
         -- continue, then fetch from db
     elseif divsteps < 1 then
-        -- divsteps = 0, div switch off, goto default upstream
+        -- divsteps = 0   , div switch off, goto default upstream
         return false, 'divsteps < 1, div switchoff'
     else
      -- divsteps fetched from cache, then get Runtime From Cache
@@ -276,12 +279,13 @@ local pfunc = function()
 
     local divsteps		= runtimeInfo.divsteps
     local runtimegroup	= runtimeInfo.runtimegroup
+    local status        = runtimeInfo.status
 
-    runtimeCache:setRuntime(hostname, divsteps, runtimegroup)
+    runtimeCache:setRuntime(hostname, divsteps,status, runtimegroup)
     if red then setKeepalive(red) end
 
     if sem then sema:post(1) end
-    return true, divsteps, runtimegroup
+    return true, divsteps,status, runtimegroup
 end
 
 
