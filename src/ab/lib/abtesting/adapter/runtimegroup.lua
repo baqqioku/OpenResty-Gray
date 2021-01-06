@@ -202,8 +202,12 @@ _M.list = function(self)
 
     for k,v in ipairs(allRuntime) do
         local strList = utils.split(v,":")
+        local prefixStatusKey  = baseLibrary..separator..strList[3]..separator..fields.status
+        ngx.log(ngx.DEBUG,prefixStatusKey,'xxxx--',v)
         if #strList>4 then
             -- continue
+        elseif prefixStatusKey == v then
+            --continue
         else
             domainList[i] = v
             i = i+1;
@@ -216,17 +220,11 @@ _M.list = function(self)
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
-            local prefixStatusKey  = prefixStatusKey..separator..str[3]..separator..fields.status
-            if prefixStatusKey == v then
-                --continue
-            else
-                realDomainList[k] = str[3]
-                local ok, err = database:get(v)
-                if not ok then error{ERRORINFO.REDIS_ERROR, err} end
-                local divstepsDomain = tonumber(ok)
-                divStepList[str[3]] = divstepsDomain
-            end
-
+            realDomainList[k] = str[3]
+            local ok, err = database:get(v)
+            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+            local divstepsDomain = tonumber(ok)
+            divStepList[str[3]] = divstepsDomain
         end
     end
 
@@ -303,8 +301,12 @@ _M.pageList = function(self,page,size)
     local i=1
     for k,v in ipairs(allRuntime) do
         local strList = utils.split(v,":")
+        local prefixStatusKey  = baseLibrary..separator..strList[3]..separator..fields.status
+        ngx.log(ngx.DEBUG,prefixStatusKey,'xxxx--',v)
         if #strList>4 then
             -- continue
+        elseif prefixStatusKey == v then
+            --continue
         else
             domainList[i] = v
             i = i+1;
@@ -317,16 +319,11 @@ _M.pageList = function(self,page,size)
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
-            local prefixStatusKey  = baseLibrary..separator..str[3]..separator..fields.status
-            if prefixStatusKey == v then
-                --continue
-            else
-                realDomainList[k] = str[3]
-                local ok, err = database:get(v)
-                if not ok then error{ERRORINFO.REDIS_ERROR, err} end
-                local divstepsDomain = tonumber(ok)
-                divStepList[str[3]] = divstepsDomain
-            end
+            realDomainList[k] = str[3]
+            local ok, err = database:get(v)
+            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+            local divstepsDomain = tonumber(ok)
+            divStepList[str[3]] = divstepsDomain
         end
     end
 
