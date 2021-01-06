@@ -162,7 +162,7 @@ local loadGrayServer = function()
         -- continue, then fetch from db
     elseif graySwitch == 'off' then
         -- graySwitch = 0, div switch off, goto default upstream
-        if sem then sema:post(1) end
+        --if sem then sema:post(1) end
         return false, graySwitch,'graySwitch == off, div switch off'
     else
         return true,graySwitch
@@ -171,7 +171,7 @@ local loadGrayServer = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        if sem then sema:post(1) end
+        --if sem then sema:post(1) end
         return ok, db
     end
 
@@ -197,6 +197,11 @@ local loadGrayServer = function()
     return true, graySwitch
 end
 
+local statusPfunc = function()
+
+end
+
+
 -- getRuntimeInfo from cache or db
 local pfunc = function()
 
@@ -214,30 +219,31 @@ local pfunc = function()
     else
         local info = 'get Gray Server error: '
         if  not status and graySwitch == 'off' then
-           info = info .. 'graySwitch = off , div switch OFF'
+            info = info .. 'graySwitch = off , div switch OFF'
             log:info(doredirect(info))
             return false,-1,nil
         end
     end
 
---[[    if  not status and graySwitch == 'off' then
-        return false,-1,nil
-    end]]
+    --[[    if  not status and graySwitch == 'off' then
+            return false,-1,nil
+        end]]
 
     local runtimeCache  = cache:new(ngx.var.sysConfig)
     --step 1: read frome cache, but error
     local divsteps = runtimeCache:getSteps(hostname)
-    if not divsteps then
+    local runtimeStatus   = runtimeCache:getStatus(hostname)
+    if not divsteps or not runtimeStatus then
         -- continue, then fetch from db
-    elseif divsteps < 1 then
-        -- divsteps = 0, div switch off, goto default upstream
-        return false, 'divsteps < 1, div switchoff'
+    elseif divsteps < 1 or runtimeStatus ==0 then
+        -- divsteps = 0   , div switch off, goto default upstream
+        return false, 'status == 0,divsteps < 1, div switchoff'
     else
-     -- divsteps fetched from cache, then get Runtime From Cache
+        -- divsteps fetched from cache, then get Runtime From Cache
         local ok, runtimegroup = runtimeCache:getRuntime(hostname, divsteps)
         if ok then
             return true, divsteps, runtimegroup
-        -- else fetch from db
+            -- else fetch from db
         end
     end
 
@@ -250,19 +256,20 @@ local pfunc = function()
 
     -- setp 3: read from cache again
     local divsteps = runtimeCache:getSteps(hostname)
-    if not divsteps then
+    local runtimeStatus   = runtimeCache:getStatus(hostname)
+    if not divsteps or runtimeStatus then
         -- continue, then fetch from db
-    elseif divsteps < 1 then
+    elseif divsteps < 1 or runtimeStatus == 0 then
         -- divsteps = 0, div switch off, goto default upstream
         if sem then sema:post(1) end
-        return false, 'divsteps < 1, div switchoff'
+        return false, 'status ==0,divsteps < 1, div switchoff'
     else
-     -- divsteps fetched from cache, then get Runtime From Cache
+        -- divsteps fetched from cache, then get Runtime From Cache
         local ok, runtimegroup = runtimeCache:getRuntime(hostname, divsteps)
         if ok then
             if sem then sema:post(1) end
             return true, divsteps, runtimegroup
-        -- else fetch from db
+            -- else fetch from db
         end
     end
 
@@ -270,7 +277,7 @@ local pfunc = function()
     local ok, db = connectdb(red, redisConf)
     if not ok then
         if sem then sema:post(1) end
-		return ok, db
+        return ok, db
     end
 
     local database      = db.redis
@@ -278,18 +285,25 @@ local pfunc = function()
 
     local divsteps		= runtimeInfo.divsteps
     local runtimegroup	= runtimeInfo.runtimegroup
+    local runtimeStatus = tonumber(runtimeInfo.status)
 
-    runtimeCache:setRuntime(hostname, divsteps, runtimegroup)
+    runtimeCache:setRuntime(hostname, divsteps,runtimeStatus, runtimegroup)
+
+    if runtimeStatus == 0 then
+        return false,'status == 0, div switchoff'
+    end
+
     if red then setKeepalive(red) end
 
     if sem then sema:post(1) end
+
     return true, divsteps, runtimegroup
 end
 
 
 
 
-local ok, status, steps, runtimeInfo = xpcall(pfunc, handler)
+local ok, status, steps,runtimeInfo = xpcall(pfunc, handler)
 --ngx.log(ngx.DEBUG," ",ok," ",status," ",steps)
 if not ok then
     -- execute error, the type of status is table now

@@ -54,7 +54,14 @@ _M.getStatus = function(self, hostname)
     return tonumber(status)
 end
 
-_M.getRuntime = function(self, hostname, divsteps)
+_M.setStatus = function(self, hostname,status)
+    local cache = self.cache
+    local k_status    = runtimeLib..':'..hostname..':'..fields.status
+    local status      = cache:set(k_status,status,shdict_expire)
+    return tonumber(status)
+end
+
+_M.getRuntime = function(self, hostname, divsteps,status)
     local cache = self.cache
     local runtimegroup = {}
     local prefix = runtimeLib .. ':' .. hostname
@@ -79,11 +86,12 @@ _M.getRuntime = function(self, hostname, divsteps)
         runtimegroup[idx] = runtime
     end
 
+    runtimegroup.status = tonumber(status)
     return true, runtimegroup
 
 end
 
-_M.setRuntime = function(self, hostname, divsteps, runtimegroup)
+_M.setRuntime = function(self, hostname, divsteps,status, runtimegroup)
     local cache = self.cache
     local prefix = runtimeLib .. ':' .. hostname
     local expire = shdict_expire
@@ -104,8 +112,10 @@ _M.setRuntime = function(self, hostname, divsteps, runtimegroup)
     end
 
     local k_divsteps = prefix ..':'..fields.divsteps
+    local k_status   = prefix ..':'..fields.status
     local ok, err = cache:set(k_divsteps, divsteps, shdict_expire)
-    if not ok then return false end
+    local ok1, err = cache:set(k_status,status,shdict_expire)
+    if not ok and not ok1 then return false end
 
     return true
 end
