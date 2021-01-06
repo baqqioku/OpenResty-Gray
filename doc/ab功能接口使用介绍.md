@@ -38,6 +38,7 @@ ab管理接口
 * /ab_admin?action=runtime_del
 * /ab_admin?action=runtime_list
 * /ab_admin?action=runtime_pageList
+* /ab_admin?action=runtime_change_status
 
 ```
 * 1.检查策略是否合法                    
@@ -526,7 +527,16 @@ ab管理接口
         * 参数：action: 代表要执行的操作，删除系统运行时信息runtime_del
         * 返回值：{"code":200,"desc":"success "}
         
-* 18.灰度服务设置 
+* 18.变更系统运行时策略的状态                   
+    * curl  localhost:port/ab_admin?action=runtime_change_status&hostname=localhost&status=0
+  
+    * 接口说明:    
+        * 参数：action: 代表要执行的操作，runtime_change_status
+        * 参数：hostname: 代表主机域名
+        * 参数：status: 代表状态 1：启用 0，关闭
+        * 返回值：{"code":200,"desc":"success "}
+        
+* 19.灰度服务设置 
     * curl  localhost:port/ab_admin?action=grayserver_set -d '[{"name":"abc","switch":"on"},{"name":"driver","switch":"off"}]'
   
     * 接口说明:    
@@ -541,7 +551,7 @@ ab管理接口
             ]
         }
         
-* 19.灰度服务更新
+* 20.灰度服务更新
     * curl  localhost:8080/ab_admin?action=grayserver_update&server_name=abc&switch=off
   
     * 接口说明:    
@@ -553,7 +563,7 @@ ab管理接口
             "data": "abc"
         }        
 
-* 20.灰度服务删除
+* 21.灰度服务删除
     * curl  localhost:8080/ab_admin?action=grayserver_del&server_name=driver
   
     * 接口说明:    
@@ -565,7 +575,7 @@ ab管理接口
             "code": 200
         }  
         
-* 21.灰度服务查看
+* 22.灰度服务查看
              * curl  localhost:8080/ab_admin?action=grayserver_get&server_name=abc
            
              * 接口说明:    
@@ -581,7 +591,7 @@ ab管理接口
                      }
                  }
                  
-* 22.灰度服务列表
+* 23.灰度服务列表
     * curl  localhost:8080/ab_admin?action=grayserver_pageList&page=1&size=2
   
     * 接口说明:    
