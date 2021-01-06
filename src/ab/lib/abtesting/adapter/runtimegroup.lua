@@ -313,12 +313,11 @@ _M.pageList = function(self,page,size)
 
     local divStepList = {}
     local realDomainList = {}
-    local prefixStatusKey = baseLibrary
 
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
-            local prefixStatusKey  = prefixStatusKey..separator..str[3]..separator..fields.status
+            local prefixStatusKey  = baseLibrary..separator..str[3]..separator..fields.status
             if prefixStatusKey == v then
                 --continue
             else
