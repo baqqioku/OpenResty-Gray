@@ -199,6 +199,7 @@ _M.list = function(self)
     end
     local domainList = {}
     local i=1
+
     for k,v in ipairs(allRuntime) do
         local strList = utils.split(v,":")
         if #strList>4 then
@@ -211,15 +212,21 @@ _M.list = function(self)
 
     local divStepList = {}
     local realDomainList = {}
-
+    local prefixStatusKey = baseLibrary
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
-            realDomainList[k] = str[3]
-            local ok, err = database:get(v)
-            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
-            local divstepsDomain = tonumber(ok)
-            divStepList[str[3]] = divstepsDomain
+            local prefixStatusKey  = prefixStatusKey..separator..str[3]..separator..fields.status
+            if prefixStatusKey == v then
+                --continue
+            else
+                realDomainList[k] = str[3]
+                local ok, err = database:get(v)
+                if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+                local divstepsDomain = tonumber(ok)
+                divStepList[str[3]] = divstepsDomain
+            end
+
         end
     end
 
@@ -232,6 +239,15 @@ _M.list = function(self)
         local divSteps = divStepList[_domain]
         local modelNames = {}
         local policys = {}
+
+        local statusKey = table.concat({prefix, fields.status}, separator)
+        local ok,err = database:get(statusKey)
+        if not ok or ok == ngx.null or ok == null then
+            model.status = 1
+        else
+            model.status = ok
+        end
+
         for i = 1, divSteps do
             local idx = indices[i]
             local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
@@ -252,9 +268,10 @@ _M.list = function(self)
         end
         model.divtypes = modelNames
         model.policys = policys
+
         ret[k] = model
     end
-
+    ngx.log(ngx.DEBUG,cjson.encode(ret))
     table.sort(ret, function(n1, n2)
         return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1])
     end)
@@ -296,15 +313,21 @@ _M.pageList = function(self,page,size)
 
     local divStepList = {}
     local realDomainList = {}
+    local prefixStatusKey = baseLibrary
 
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
-            realDomainList[k] = str[3]
-            local ok, err = database:get(v)
-            if not ok then error{ERRORINFO.REDIS_ERROR, err} end
-            local divstepsDomain = tonumber(ok)
-            divStepList[str[3]] = divstepsDomain
+            local prefixStatusKey  = prefixStatusKey..separator..str[3]..separator..fields.status
+            if prefixStatusKey == v then
+                --continue
+            else
+                realDomainList[k] = str[3]
+                local ok, err = database:get(v)
+                if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+                local divstepsDomain = tonumber(ok)
+                divStepList[str[3]] = divstepsDomain
+            end
         end
     end
 
@@ -315,6 +338,15 @@ _M.pageList = function(self,page,size)
         model.domain = _domain
         local prefix = baseLibrary .. ':' .. _domain
         local divSteps = divStepList[_domain]
+
+        local statusKey = table.concat({prefix, fields.status}, separator)
+        local ok,err = database:get(statusKey)
+        if not ok or ok == ngx.null or ok == null then
+            model.status = 1
+        else
+            model.status = ok
+        end
+
         local modelNames = {}
         local policys = {}
         for i = 1, divSteps do
