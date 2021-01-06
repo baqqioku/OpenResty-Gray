@@ -16,6 +16,9 @@ local utils         = require('abtesting.utils.utils')
 local log			= require('abtesting.utils.log')
 local ERRORINFO     = require('abtesting.error.errcode').info
 
+local cache         = require('abtesting.utils.cache')
+
+
 local prefixConf    = systemConf.prefixConf
 local runtimeLib    = prefixConf.runtimeInfoPrefix
 local policyLib     = prefixConf.policyLibPrefix
@@ -279,11 +282,11 @@ _M.pageList = function(option)
     end
 end
 
-_M.changeStatus = function(option, policyId,status)
+_M.changeStatus = function(option)
     local db = option.db
     local database = db.redis
     local hostname = getHostName()
-
+    local status =  ngx.var.arg_status
     if not hostname or string.len(hostname) < 1 or hostname == ngx.null then
         local info = ERRORINFO.PARAMETER_TYPE_ERROR
         local desc = 'arg hostname invalid: '
@@ -293,35 +296,32 @@ _M.changeStatus = function(option, policyId,status)
         return nil
     end
 
+    if not status or string.len(status) < 1 or status == ngx.null then
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = 'arg status invalid: '
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
 
     local pfunc = function()
-        local policyMod = policyModule:new(database, policyLib)
-        local policy = policyMod:get(policyId)
-
-        local divtype = policy.divtype
-        local divdata = policy.divdata
-
-        if divtype == ngx.null or divdata == ngx.null then
-            error{ERRORINFO.POLICY_BLANK_ERROR, 'policy NO '..policyId}
-        end
-
-        if not divtypes[divtype] then
-
-        end
-
-        local statusPrefix = hostname .. ':status'
-
-        local statusKey           = runtimeLib .. ':' .. statusPrefix .. ':' .. fields.status
+        local statusKey           = runtimeLib .. ':' .. hostname .. ':' .. fields.status
         local ok, err = database:set(statusKey, status)
         if not ok then error{ERRORINFO.REDIS_ERROR, err} end
     end
 
-    local status, info = xpcall(pfunc, handler)
-    if not status then
+    local ok, info = xpcall(pfunc, handler)
+    if not ok then
         local response = doerror(info)
         ngx.say(response)
         return false
     end
+    ngx.log(ngx.DEBUG,ngx.var.sysConfig)
+
+    local systemConfCache  = cache:new(ngx.var.sysConfig)
+    systemConfCache:setStatus(hostname,status)
 
     local response = doresp(ERRORINFO.SUCCESS)
     ngx.say(response)

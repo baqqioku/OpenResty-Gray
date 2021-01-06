@@ -54,6 +54,13 @@ _M.getStatus = function(self, hostname)
     return tonumber(status)
 end
 
+_M.setStatus = function(self, hostname,status)
+    local cache = self.cache
+    local k_status    = runtimeLib..':'..hostname..':'..fields.status
+    local status      = cache:set(k_status,status,shdict_expire)
+    return tonumber(status)
+end
+
 _M.getRuntime = function(self, hostname, divsteps,status)
     local cache = self.cache
     local runtimegroup = {}
