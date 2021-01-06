@@ -255,7 +255,9 @@ _M.list = function(self)
         ret[k] = model
     end
 
-    table.sort(ret, function(n1, n2) return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1]) end)
+    table.sort(ret, function(n1, n2)
+        return tonumber(n1['policys'][1]) < tonumber(n2['policys'][1])
+    end)
 
     ngx.log(ngx.DEBUG,cjson.encode(ret))
     return ret;
