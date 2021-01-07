@@ -1,5 +1,4 @@
 local runtimeModule = require('abtesting.adapter.runtimegroup')
-local grayServer    = require('admin.grayserver')
 local redisModule   = require('abtesting.utils.redis')
 local systemConf    = require('abtesting.utils.init')
 local utils         = require('abtesting.utils.utils')

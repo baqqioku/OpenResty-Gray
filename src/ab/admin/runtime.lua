@@ -6,7 +6,6 @@ local modulename = "abtestingAdminRuntime"
 local _M = { _VERSION = "0.0.1" }
 local mt = { __index = _M }
 
-local ERRORINFO	= require('abtesting.error.errcode').info
 
 local runtimeModule = require('abtesting.adapter.runtime')
 local policyModule  = require('abtesting.adapter.policy')

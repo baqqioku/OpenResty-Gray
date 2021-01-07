@@ -10,8 +10,6 @@ local _M = { _VERSION = "0.0.1" }
 local mt = { __index = _M }
 
 local systemConf    = require('abtesting.utils.init')
-local utils         = require('abtesting.utils.utils')
-local log			= require('abtesting.utils.log')
 local ERRORINFO     = require('abtesting.error.errcode').info
 local cjson         = require('cjson.safe')
 

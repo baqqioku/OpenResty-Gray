@@ -77,8 +77,8 @@ _M.check = function(self, policy)
     local last_edip
     for i, v in pairs(policy) do
         range, upstream = v[k_range], v[k_upstream]
-        stip = tonumber(ip_parser.ip2long(range['start']))
-        edip = tonumber(ip_parser.ip2long(range['end']))
+        stip = tonumber(ip_parser.ip2long(range[k_start]))
+        edip = tonumber(ip_parser.ip2long(range[k_end]))
 
         if type(upstream) ~= 'string' then
             local info = ERRORINFO.POLICY_INVALID_ERROR
