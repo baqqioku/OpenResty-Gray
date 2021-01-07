@@ -11,18 +11,12 @@ local policygroup   = require("admin.policygroup")
 local grayserver    = require("admin.grayserver")
 
 
-local cache         = require('abtesting.utils.cache')
-
-local cjson         = require('cjson.safe')
 local doresp        = utils.doresp
 local dolog         = utils.dolog
 
 local redisConf     = systemConf.redisConf
-local divtypes      = systemConf.divtypes
-local prefixConf    = systemConf.prefixConf
-local policyLib     = prefixConf.policyLibPrefix
-local runtimeLib    = prefixConf.runtimeInfoPrefix
-local domain_name   = prefixConf.domainname
+
+
 
 local ab_action = {}
 
