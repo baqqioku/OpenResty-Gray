@@ -208,7 +208,7 @@ local pfunc = function()
     if not divEnable then
         return false,-1,nil
     end
-
+    --[[
     local ok,status, graySwitch = xpcall(loadGrayServer,handler)
     --ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
@@ -224,7 +224,7 @@ local pfunc = function()
             return false,-1,nil
         end
     end
-
+   ]]
     --[[    if  not status and graySwitch == 'off' then
             return false,-1,nil
         end]]
