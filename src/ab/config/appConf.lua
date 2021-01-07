@@ -17,7 +17,7 @@ _M.grayApp = {
 }
 
 _M.global_configs = {
-    ["divEnable"] = false,  -- 分流开关，true表示开启
+    ["divEnable"] = true,  -- 分流开关，true表示开启
     ["newTrafficRate"] = 100,  -- 分流比例，0-1000， 1000表示全部流量，100%
 
 }
