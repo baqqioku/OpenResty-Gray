@@ -40,8 +40,8 @@ _M.check = function(self, policy)
     local last_eduid
     for i, v in pairs(policy) do
     range, upstream = v[k_range], v[k_upstream]
-    stuid = range['start']
-    eduid = range['end']
+    stuid = range[k_start]
+    eduid = range[k_end]
     
     if type(upstream) ~= 'string' then
         local info = ERRORINFO.POLICY_INVALID_ERROR
