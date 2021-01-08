@@ -15,7 +15,7 @@ _M._VERSION = '0.0.1'
 }]]
 
 _M.redisConf = {
-    ["uds"]      = '/tmp/redis.sock',
+    --["uds"]      = '/tmp/redis.sock',
     ["host"]     = '172.18.5.110',
     ["port"]     = '6379',
     ["poolsize"] = 20000,
