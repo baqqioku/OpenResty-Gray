@@ -1,29 +1,35 @@
--- Copyright (C) Yichun Zhang (agentzh), CloudFlare Inc.
+-- Copyright (C) Yichun Zhang (agentzh)
 
 
 local sub = string.sub
 local byte = string.byte
+local tab_insert = table.insert
+local tab_remove = table.remove
 local tcp = ngx.socket.tcp
-local concat = table.concat
 local null = ngx.null
+local ipairs = ipairs
+local type = type
 local pairs = pairs
 local unpack = unpack
 local setmetatable = setmetatable
 local tonumber = tonumber
-local error = error
+local tostring = tostring
+local rawget = rawget
+local select = select
+--local error = error
 
 
 local ok, new_tab = pcall(require, "table.new")
-if not ok then
+if not ok or type(new_tab) ~= "function" then
     new_tab = function (narr, nrec) return {} end
 end
 
 
-local _M = new_tab(0, 155)
-_M._VERSION = '0.20'
+local _M = new_tab(0, 55)
 
+_M._VERSION = '0.29'
 
-local commands = {
+local common_cmds = {
     "append",            "auth",              "bgrewriteaof",
     "bgsave",            "bitcount",          "bitop",
     "blpop",             "brpop",
@@ -101,39 +107,122 @@ function _M.new(self)
     if not sock then
         return nil, err
     end
-    return setmetatable({ sock = sock }, mt)
+    return setmetatable({ _sock = sock,
+                          _subscribed = false,
+                          _n_channel = {
+                              unsubscribe = 0,
+                              punsubscribe = 0,
+                          },
+    }, mt)
 end
 
 
 function _M.set_timeout(self, timeout)
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
-        return nil, "not initialized"
+        error("not initialized", 2)
+        return
     end
 
-    return sock:settimeout(timeout)
+    sock:settimeout(timeout)
 end
 
 
-function _M.connect(self, ...)
-    local sock = self.sock
+function _M.set_timeouts(self, connect_timeout, send_timeout, read_timeout)
+    local sock = rawget(self, "_sock")
+    if not sock then
+        error("not initialized", 2)
+        return
+    end
+
+    sock:settimeouts(connect_timeout, send_timeout, read_timeout)
+end
+
+
+function _M.connect(self, host, port_or_opts, opts)
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
 
-    self.subscribed = nil
+    local unix
 
-    return sock:connect(...)
+    do
+        local typ = type(host)
+        if typ ~= "string" then
+            error("bad argument #1 host: string expected, got " .. typ, 2)
+        end
+
+        if sub(host, 1, 5) == "unix:" then
+            unix = true
+        end
+
+        if unix then
+            typ = type(port_or_opts)
+            if port_or_opts ~= nil and typ ~= "table" then
+                error("bad argument #2 opts: nil or table expected, got " ..
+                        typ, 2)
+            end
+
+        else
+            typ = type(port_or_opts)
+            if typ ~= "number" then
+                port_or_opts = tonumber(port_or_opts)
+                if port_or_opts == nil then
+                    error("bad argument #2 port: number expected, got " ..
+                            typ, 2)
+                end
+            end
+
+            if opts ~= nil then
+                typ = type(opts)
+                if typ ~= "table" then
+                    error("bad argument #3 opts: nil or table expected, got " ..
+                            typ, 2)
+                end
+            end
+        end
+
+    end
+
+    self._subscribed = false
+
+    local ok, err
+
+    if unix then
+        -- second argument of sock:connect() cannot be nil
+        if port_or_opts ~= nil then
+            ok, err = sock:connect(host, port_or_opts)
+            opts = port_or_opts
+        else
+            ok, err = sock:connect(host)
+        end
+    else
+        ok, err = sock:connect(host, port_or_opts, opts)
+    end
+
+    if not ok then
+        return ok, err
+    end
+
+    if opts and opts.ssl then
+        ok, err = sock:sslhandshake(false, opts.server_name, opts.ssl_verify)
+        if not ok then
+            return ok, "failed to do ssl handshake: " .. err
+        end
+    end
+
+    return ok, err
 end
 
 
 function _M.set_keepalive(self, ...)
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
 
-    if self.subscribed then
+    if rawget(self, "_subscribed") then
         return nil, "subscribed state"
     end
 
@@ -142,7 +231,7 @@ end
 
 
 function _M.get_reused_times(self)
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
@@ -152,7 +241,7 @@ end
 
 
 local function close(self)
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
@@ -165,7 +254,7 @@ _M.close = close
 local function _read_reply(self, sock)
     local line, err = sock:receive()
     if not line then
-        if err == "timeout" and not self.subscribed then
+        if err == "timeout" and not rawget(self, "_subscribed") then
             sock:close()
         end
         return nil, err
@@ -174,6 +263,7 @@ local function _read_reply(self, sock)
     local prefix = byte(line)
 
     if prefix == 36 then    -- char '$'
+        -- print("bulk reply")
 
         local size = tonumber(sub(line, 2))
         if size < 0 then
@@ -190,12 +280,16 @@ local function _read_reply(self, sock)
 
         local dummy, err = sock:receive(2) -- ignore CRLF
         if not dummy then
+            if err == "timeout" then
+                sock:close()
+            end
             return nil, err
         end
 
         return data
 
     elseif prefix == 43 then    -- char '+'
+        -- print("status reply")
 
         return sub(line, 2)
 
@@ -207,7 +301,7 @@ local function _read_reply(self, sock)
             return null
         end
 
-        local vals = new_tab(n, 0);
+        local vals = new_tab(n, 0)
         local nvals = 0
         for i = 1, n do
             local res, err = _read_reply(self, sock)
@@ -237,7 +331,8 @@ local function _read_reply(self, sock)
         return false, sub(line, 2)
 
     else
-        return nil, "unkown prefix: \"" .. prefix .. "\""
+        -- when `line` is an empty string, `prefix` will be equal to nil.
+        return nil, "unknown prefix: \"" .. tostring(prefix) .. "\""
     end
 end
 
@@ -245,41 +340,48 @@ end
 local function _gen_req(args)
     local nargs = #args
 
-    local req = new_tab(nargs + 1, 0)
+    local req = new_tab(nargs * 5 + 1, 0)
     req[1] = "*" .. nargs .. "\r\n"
-    local nbits = 1
+    local nbits = 2
 
     for i = 1, nargs do
         local arg = args[i]
-        nbits = nbits + 1
-
-        if not arg then
-            req[nbits] = "$-1\r\n"
-
-        else
-            if type(arg) ~= "string" then
-                arg = tostring(arg)
-            end
-            req[nbits] = "$" .. #arg .. "\r\n" .. arg .. "\r\n"
+        if type(arg) ~= "string" then
+            arg = tostring(arg)
         end
+
+        req[nbits] = "$"
+        req[nbits + 1] = #arg
+        req[nbits + 2] = "\r\n"
+        req[nbits + 3] = arg
+        req[nbits + 4] = "\r\n"
+
+        nbits = nbits + 5
     end
 
-    -- it is faster to do string concatenation on the Lua land
-    return concat(req)
+    -- it is much faster to do string concatenation on the C land
+    -- in real world (large number of strings in the Lua VM)
+    return req
+end
+
+
+local function _check_msg(self, res)
+    return rawget(self, "_subscribed") and
+            type(res) == "table" and (res[1] == "message" or res[1] == "pmessage")
 end
 
 
 local function _do_cmd(self, ...)
     local args = {...}
 
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
 
     local req = _gen_req(args)
 
-    local reqs = self._reqs
+    local reqs = rawget(self, "_reqs")
     if reqs then
         reqs[#reqs + 1] = req
         return
@@ -292,74 +394,214 @@ local function _do_cmd(self, ...)
         return nil, err
     end
 
-    return _read_reply(self, sock)
-end
-
-
-local function _check_subscribed(self, res)
-    if type(res) == "table"
-       and (res[1] == "unsubscribe" or res[1] == "punsubscribe")
-       and res[3] == 0
-   then
-        self.subscribed = nil
-    end
-end
-
-
-function _M.read_reply(self)
-    local sock = self.sock
-    if not sock then
-        return nil, "not initialized"
-    end
-
-    if not self.subscribed then
-        return nil, "not subscribed"
-    end
-
     local res, err = _read_reply(self, sock)
-    _check_subscribed(self, res)
+    while _check_msg(self, res) do
+        if rawget(self, "_buffered_msg") == nil then
+            self._buffered_msg = new_tab(1, 0)
+        end
+
+        tab_insert(self._buffered_msg, res)
+        res, err = _read_reply(self, sock)
+    end
 
     return res, err
 end
 
 
-for i = 1, #commands do
-    local cmd = commands[i]
+local function _check_unsubscribed(self, res)
+    if type(res) == "table"
+            and (res[1] == "unsubscribe" or res[1] == "punsubscribe")
+    then
+        self._n_channel[res[1]] = self._n_channel[res[1]] - 1
 
-    _M[cmd] =
-        function (self, ...)
-            return _do_cmd(self, cmd, ...)
+        local buffered_msg = rawget(self, "_buffered_msg")
+        if buffered_msg then
+            -- remove messages of unsubscribed channel
+            local msg_type =
+            (res[1] == "punsubscribe") and "pmessage" or "message"
+            local j = 1
+            for _, msg in ipairs(buffered_msg) do
+                if msg[1] == msg_type and msg[2] ~= res[2] then
+                    -- move messages to overwrite the removed ones
+                    buffered_msg[j] = msg
+                    j = j + 1
+                end
+            end
+
+            -- clear remain messages
+            for i = j, #buffered_msg do
+                buffered_msg[i] = nil
+            end
+
+            if #buffered_msg == 0 then
+                self._buffered_msg = nil
+            end
         end
+
+        if res[3] == 0 then
+            -- all channels are unsubscribed
+            self._subscribed = false
+        end
+    end
 end
 
+
+local function _check_subscribed(self, res)
+    if type(res) == "table"
+            and (res[1] == "subscribe" or res[1] == "psubscribe")
+    then
+        if res[1] == "subscribe" then
+            self._n_channel.unsubscribe = self._n_channel.unsubscribe + 1
+
+        elseif res[1] == "psubscribe" then
+            self._n_channel.punsubscribe = self._n_channel.punsubscribe + 1
+        end
+    end
+end
+
+
+function _M.read_reply(self)
+    local sock = rawget(self, "_sock")
+    if not sock then
+        return nil, "not initialized"
+    end
+
+    if not rawget(self, "_subscribed") then
+        return nil, "not subscribed"
+    end
+
+    local buffered_msg = rawget(self, "_buffered_msg")
+    if buffered_msg then
+        local msg = buffered_msg[1]
+        tab_remove(buffered_msg, 1)
+
+        if #buffered_msg == 0 then
+            self._buffered_msg = nil
+        end
+
+        return msg
+    end
+
+    local res, err = _read_reply(self, sock)
+    _check_unsubscribed(self, res)
+
+    return res, err
+end
+
+
+for i = 1, #common_cmds do
+    local cmd = common_cmds[i]
+
+    _M[cmd] =
+    function (self, ...)
+        return _do_cmd(self, cmd, ...)
+    end
+end
+
+
+local function handle_subscribe_result(self, cmd, nargs, res)
+    local err
+    _check_subscribed(self, res)
+
+    if nargs <= 1 then
+        return res
+    end
+
+    local results = new_tab(nargs, 0)
+    results[1] = res
+    local sock = rawget(self, "_sock")
+
+    for i = 2, nargs do
+        res, err = _read_reply(self, sock)
+        if not res then
+            return nil, err
+        end
+
+        _check_subscribed(self, res)
+        results[i] = res
+    end
+
+    return results
+end
 
 for i = 1, #sub_commands do
     local cmd = sub_commands[i]
 
     _M[cmd] =
-        function (self, ...)
-            self.subscribed = true
-            return _do_cmd(self, cmd, ...)
+    function (self, ...)
+        if not rawget(self, "_subscribed") then
+            self._subscribed = true
         end
+
+        local nargs = select("#", ...)
+
+        local res, err = _do_cmd(self, cmd, ...)
+        if not res then
+            return nil, err
+        end
+
+        return handle_subscribe_result(self, cmd, nargs, res)
+    end
 end
 
+
+local function handle_unsubscribe_result(self, cmd, nargs, res)
+    local err
+    _check_unsubscribed(self, res)
+
+    if self._n_channel[cmd] == 0 or nargs == 1 then
+        return res
+    end
+
+    local results = new_tab(nargs, 0)
+    results[1] = res
+    local sock = rawget(self, "_sock")
+    local i = 2
+
+    while nargs == 0 or i <= nargs do
+        res, err = _read_reply(self, sock)
+        if not res then
+            return nil, err
+        end
+
+        results[i] = res
+        i = i + 1
+
+        _check_unsubscribed(self, res)
+        if self._n_channel[cmd] == 0 then
+            -- exit the loop for unsubscribe() call
+            break
+        end
+    end
+
+    return results
+end
 
 for i = 1, #unsub_commands do
     local cmd = unsub_commands[i]
 
     _M[cmd] =
-        function (self, ...)
-            local res, err = _do_cmd(self, cmd, ...)
-            _check_subscribed(self, res)
-            return res, err
+    function (self, ...)
+        -- assume all channels are unsubscribed by only one time
+        if not rawget(self, "_subscribed") then
+            return nil, "not subscribed"
         end
+
+        local nargs = select("#", ...)
+
+        local res, err = _do_cmd(self, cmd, ...)
+        if not res then
+            return nil, err
+        end
+
+        return handle_unsubscribe_result(self, cmd, nargs, res)
+    end
 end
 
 
 function _M.hmset(self, hashname, ...)
-    local args = {...}
-    if #args == 1 then
-        local t = args[1]
+    if select('#', ...) == 1 then
+        local t = select(1, ...)
 
         local n = 0
         for k, v in pairs(t) do
@@ -394,14 +636,14 @@ end
 
 
 function _M.commit_pipeline(self)
-    local reqs = self._reqs
+    local reqs = rawget(self, "_reqs")
     if not reqs then
         return nil, "no pipeline"
     end
 
     self._reqs = nil
 
-    local sock = self.sock
+    local sock = rawget(self, "_sock")
     if not sock then
         return nil, "not initialized"
     end
@@ -448,16 +690,30 @@ function _M.array_to_hash(self, t)
 end
 
 
+-- this method is deperate since we already do lazy method generation.
 function _M.add_commands(...)
     local cmds = {...}
     for i = 1, #cmds do
         local cmd = cmds[i]
         _M[cmd] =
-            function (self, ...)
-                return _do_cmd(self, cmd, ...)
-            end
+        function (self, ...)
+            return _do_cmd(self, cmd, ...)
+        end
     end
 end
+
+
+setmetatable(_M, {__index = function(self, cmd)
+    local method =
+    function (self, ...)
+        return _do_cmd(self, cmd, ...)
+    end
+
+    -- cache the lazily generated method in our
+    -- module table
+    _M[cmd] = method
+    return method
+end})
 
 
 return _M
