@@ -260,13 +260,13 @@ local pfunc = function()
         -- continue, then fetch from db
     elseif divsteps < 1 or runtimeStatus == 0 then
         -- divsteps = 0, div switch off, goto default upstream
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return false, 'status ==0,divsteps < 1, div switchoff'
     else
         -- divsteps fetched from cache, then get Runtime From Cache
         local ok, runtimegroup = runtimeCache:getRuntime(hostname, divsteps)
         if ok then
-            --if sem then sema:post(1) end
+            if sem then sema:post(1) end
             return true, divsteps, runtimegroup
             -- else fetch from db
         end
@@ -275,7 +275,7 @@ local pfunc = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return ok, db
     end
 
@@ -294,7 +294,7 @@ local pfunc = function()
 
     if red then setKeepalive(red) end
 
-    --if sem then sema:post(1) end
+    if sem then sema:post(1) end
 
     return true, divsteps, runtimegroup
 end
