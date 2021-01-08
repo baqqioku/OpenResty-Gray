@@ -260,13 +260,13 @@ local pfunc = function()
         -- continue, then fetch from db
     elseif divsteps < 1 or runtimeStatus == 0 then
         -- divsteps = 0, div switch off, goto default upstream
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return false, 'status ==0,divsteps < 1, div switchoff'
     else
         -- divsteps fetched from cache, then get Runtime From Cache
         local ok, runtimegroup = runtimeCache:getRuntime(hostname, divsteps)
         if ok then
-            --if sem then sema:post(1) end
+            if sem then sema:post(1) end
             return true, divsteps, runtimegroup
             -- else fetch from db
         end
@@ -275,7 +275,7 @@ local pfunc = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return ok, db
     end
 
@@ -294,7 +294,7 @@ local pfunc = function()
 
     if red then setKeepalive(red) end
 
-    --if sem then sema:post(1) end
+    if sem then sema:post(1) end
 
     return true, divsteps, runtimegroup
 end
@@ -347,14 +347,17 @@ local upPfunc = function()
 
         if info then
             log:debug('获取路由解析参数: ', cjson.encode(info))
+
         end
 
         if info and info ~= '' then
             usertable[idx] = info
+        else
+            usertable[idx] = -1
         end
     end
 
-	log:debug('userinfo\t', cjson.encode(usertable))
+	log:debug('usertable\t', cjson.encode(usertable))
 
 --  usertable is empty, it seems that will never happen
 --    if not next(usertable) then
@@ -443,17 +446,19 @@ local upPfunc = function()
             local upstream = getUpstream(runtime, database, info)
             if not upstream then
                 upstreamCache:setUpstream(hostname,info, -1)
-				log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
+                log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
             else
                 if sem then upsSema:post(1) end
                 if red then setKeepalive(red) end
 
                 upstreamCache:setUpstream(hostname,info, upstream)
-				log:debug('fetch userinfo [', info, '] from redis db, get [', upstream, ']')
+                log:debug('fetch userinfo [', info, '] from redis db, get [', upstream, ']')
 
-				local info = "get upstream ["..upstream.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in db"
+                local info = "get upstream ["..upstream.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in db"
                 return upstream, info
             end
+        else
+
         end
     end
 

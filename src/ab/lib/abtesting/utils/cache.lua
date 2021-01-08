@@ -134,6 +134,7 @@ _M.getUpstream = function(self,hostname, divsteps, usertable)
             ngx.log(ngx.DEBUG,"获取拼接后的 upstream 键值: ",key)
             local ups   = cache:get(key)
             upstable[idx] = ups
+
         end
     end
     return upstable
