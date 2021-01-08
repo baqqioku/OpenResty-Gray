@@ -260,13 +260,13 @@ local pfunc = function()
         -- continue, then fetch from db
     elseif divsteps < 1 or runtimeStatus == 0 then
         -- divsteps = 0, div switch off, goto default upstream
-        if sem then sema:post(1) end
+        --if sem then sema:post(1) end
         return false, 'status ==0,divsteps < 1, div switchoff'
     else
         -- divsteps fetched from cache, then get Runtime From Cache
         local ok, runtimegroup = runtimeCache:getRuntime(hostname, divsteps)
         if ok then
-            if sem then sema:post(1) end
+            --if sem then sema:post(1) end
             return true, divsteps, runtimegroup
             -- else fetch from db
         end
@@ -275,7 +275,7 @@ local pfunc = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        if sem then sema:post(1) end
+        --if sem then sema:post(1) end
         return ok, db
     end
 
@@ -294,7 +294,7 @@ local pfunc = function()
 
     if red then setKeepalive(red) end
 
-    if sem then sema:post(1) end
+    --if sem then sema:post(1) end
 
     return true, divsteps, runtimegroup
 end
@@ -422,7 +422,7 @@ local upPfunc = function()
 			-- do not break, may be the next one will be okay
              break
         else
-            if sem then upsSema:post(1) end
+            --if sem then upsSema:post(1) end
 			local info = "get upstream ["..ups.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in cache 2"
             return ups, info
         end
@@ -431,7 +431,7 @@ local upPfunc = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        if sem then upsSema:post(1) end
+        --if sem then upsSema:post(1) end
 		return nil, db
     end
     local database = db.redis
@@ -448,7 +448,7 @@ local upPfunc = function()
                 upstreamCache:setUpstream(hostname,info, -1)
                 log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
             else
-                if sem then upsSema:post(1) end
+                --if sem then upsSema:post(1) end
                 if red then setKeepalive(red) end
 
                 upstreamCache:setUpstream(hostname,info, upstream)
@@ -462,7 +462,7 @@ local upPfunc = function()
         end
     end
 
-    if sem then upsSema:post(1) end
+    --if sem then upsSema:post(1) end
     if red
         then setKeepalive(red)
     end
