@@ -17,7 +17,7 @@ _M.grayApp = {
 }
 
 _M.global_configs = {
-    ["divEnable"] = true,  -- 分流开关，true表示开启
+    ["divEnable"] = false,  -- 分流开关，true表示开启
     ["newTrafficRate"] = 100,  -- 分流比例，0-1000， 1000表示全部流量，100%
 
 }
@@ -29,7 +29,7 @@ _M.graySwith = {
 }
 
 _M.redisConf = {
-    ["uds"]      = '/var/run/redis.sock',
+    --["uds"]      = '/var/run/redis.sock',
     ["host"]     = '192.168.126.130',
     ["port"]     = '6379',
     ["poolsize"] = 10000,
