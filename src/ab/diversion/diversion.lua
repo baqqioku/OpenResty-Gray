@@ -353,7 +353,7 @@ local upPfunc = function()
         if info and info ~= '' then
             usertable[idx] = info
         else
-            upstable[idx] = -1
+            usertable[idx] = -1
         end
     end
 
