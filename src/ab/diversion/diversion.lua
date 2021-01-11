@@ -220,10 +220,6 @@ local pfunc = function()
         end
     end
 
-    --[[    if  not status and graySwitch == 'off' then
-            return false,-1,nil
-        end]]
-
     local runtimeCache  = cache:new(ngx.var.sysConfig)
     --step 1: read frome cache, but error
     local divsteps = runtimeCache:getSteps(hostname)
