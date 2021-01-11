@@ -196,10 +196,6 @@ local loadGrayServer = function()
     return true, graySwitch
 end
 
-local statusPfunc = function()
-
-end
-
 
 -- getRuntimeInfo from cache or db
 local pfunc = function()
@@ -351,6 +347,8 @@ local upPfunc = function()
 
         if info and info ~= '' then
             usertable[idx] = info
+        else
+            usertable[idx] = -1
         end
     end
 
@@ -480,4 +478,4 @@ end
 
 
 local info = doredirect(desc)
-log:errlog(info)
+log:info(info)

@@ -87,12 +87,12 @@ _M.del = function(option)
 
     local hostname = getHostName()
     if not hostname or string.len(hostname) < 1 or hostname == ngx.null then
-        local info = ERRORINFO.PARAMETER_TYPE_ERROR 
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
         local desc = 'arg hostname invalid: '
         local response = doresp(info, desc)
         log:errlog(dolog(info, desc))
         ngx.say(response)
-        return nil 
+        return nil
     end
 
     local pfunc = function()
@@ -127,12 +127,12 @@ _M.set = function(option)
     elseif policyGroupId and policyGroupId >= 0 then
         _M.groupset(option, policyGroupId)
     else
-        local info = ERRORINFO.PARAMETER_TYPE_ERROR 
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
         local desc = "policyId or policyGroupid invalid"
         local response = doresp(info, desc)
         log:errlog(dolog(info, desc))
         ngx.say(response)
-        return nil 
+        return nil
     end
 end
 
@@ -222,8 +222,10 @@ _M.runtimeset = function(option, policyId)
         runtimeMod:set(prefix, divModulename, divDataKey, userInfoModulename)
 
         local divSteps           = runtimeLib .. ':' .. hostname .. ':' .. fields.divsteps
-        local ok, err = database:set(divSteps, 1)
-        if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+        local statusKey           = runtimeLib .. ':' .. hostname .. ':' .. fields.status
+        local ok, err = database:set(divSteps, divsteps)
+        local ok1,err = database:set(statusKey,1)
+        if not ok or not ok1 then error{ERRORINFO.REDIS_ERROR, err} end
     end
 
     local status, info = xpcall(pfunc, handler)
@@ -233,7 +235,8 @@ _M.runtimeset = function(option, policyId)
         return false
     end
 
-
+    local sysConfig =  cache:new(ngx.var.sysConfig)
+    sysConfig:setDomain(hostname)
     local response = doresp(ERRORINFO.SUCCESS)
     ngx.say(response)
     return true

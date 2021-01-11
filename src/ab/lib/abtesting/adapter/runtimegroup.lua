@@ -99,7 +99,10 @@ _M.set = function(self, domain, policyGroupId, divsteps)
     end
     
     local divStep = prefix .. ':' .. fields.divsteps
-    database:set(divStep, divsteps)
+    local statusKey = prefix..separator..fields.status
+    local ok,err  = database:set(divStep, divsteps)
+    local ok1,err = database:set(statusKey,1)
+    if not ok or not ok1 then  error{ERRORINFO.REDIS_ERROR, err} end
 
     return ERRORINFO.SUCCESS
 end
