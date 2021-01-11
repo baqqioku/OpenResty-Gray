@@ -80,8 +80,8 @@ _M.getRuntime = function(self, hostname, divsteps,status)
         end
 
         local runtime = {}
-        runtime[fields.divModulename  ] = divMod
-        runtime[fields.divDataKey     ] = divPolicy
+        runtime[fields.divModulename] = divMod
+        runtime[fields.divDataKey] = divPolicy
         runtime[fields.userInfoModulename] = userInfoMod
         runtimegroup[idx] = runtime
     end
@@ -173,6 +173,45 @@ _M.getGrayServer = function(self, grayServerName)
     local switch   = cache:get(grayServerName)
     return switch
 end
+
+_M.setDomain = function(self,domain)
+    local cache = self.cache
+    local expire = shdict_expire
+    local ok,err = cache:set(domain,domain,expire)
+    if not ok then return false end
+    return true
+end
+
+_M.getDomain = function(self,domain)
+    local cache = self.cache
+    local ok = cache:get(domain)
+    return ok
+end
+
+_M.updateUpstream = function(self, info, upstream)
+    local cache = self.cache
+    local domainList = cache:get_keys()
+    for i = 1, #domainList do
+        ngx.log(nginx.DEBUG,domainList[i])
+        local domain = self.getDomain(domainList[i])
+        if domain then
+            local key = domain..separator..info
+            local ups   = cache:get(key)
+            if ups then
+                self.setUpstream(domain, info, upstream)
+                break
+            end
+        end
+    end
+end
+
+
+
+
+
+
+
+
 
 
 return _M

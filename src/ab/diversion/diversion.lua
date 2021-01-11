@@ -196,10 +196,6 @@ local loadGrayServer = function()
     return true, graySwitch
 end
 
-local statusPfunc = function()
-
-end
-
 
 -- getRuntimeInfo from cache or db
 local pfunc = function()
@@ -485,4 +481,4 @@ end
 
 
 local info = doredirect(desc)
-log:errlog(info)
+log:info(info)
