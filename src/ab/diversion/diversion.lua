@@ -204,7 +204,7 @@ local pfunc = function()
         return false,-1,nil
     end
 
-    local ok,status, graySwitch = xpcall(loadGrayServer,handler)
+--[[    local ok,status, graySwitch = xpcall(loadGrayServer,handler)
     --ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
     if not ok then
@@ -218,7 +218,7 @@ local pfunc = function()
             log:info(doredirect(info))
             return false,-1,nil
         end
-    end
+    end]]
 
 
     local runtimeCache  = cache:new(ngx.var.sysConfig)
