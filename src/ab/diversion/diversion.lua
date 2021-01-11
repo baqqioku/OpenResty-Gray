@@ -439,19 +439,17 @@ local upPfunc = function()
             local upstream = getUpstream(runtime, database, info)
             if not upstream then
                 upstreamCache:setUpstream(hostname,info, -1)
-                log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
+				log:debug('fetch userinfo [', info, '] from redis db, get [nil]')
             else
                 if sem then upsSema:post(1) end
                 if red then setKeepalive(red) end
 
                 upstreamCache:setUpstream(hostname,info, upstream)
-                log:debug('fetch userinfo [', info, '] from redis db, get [', upstream, ']')
+				log:debug('fetch userinfo [', info, '] from redis db, get [', upstream, ']')
 
-                local info = "get upstream ["..upstream.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in db"
+				local info = "get upstream ["..upstream.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in db"
                 return upstream, info
             end
-        else
-
         end
     end
 
@@ -478,4 +476,4 @@ end
 
 
 local info = doredirect(desc)
-log:info(info)
+log:debug(info)
