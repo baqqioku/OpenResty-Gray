@@ -22,5 +22,23 @@ _M.global_configs = {
 
 }
 
+_M.redisConf = {
+    --["uds"]      = '/tmp/redis.sock',
+    ["host"]     = '172.18.5.110',
+    ["port"]     = '6379',
+    ["poolsize"] = 20000,
+    ["idletime"] = 90000 ,
+    ["timeout"]  = 3000,
+    ["dbid"]     = 0,
+    ["auth"]     = 'Yq0wHk5AmlpJ0lEleO5zsMNN6npXOQ'
+}
+
+
+_M.divConf = {
+    ["default_backend"]     = ngx.var.default_backend,
+    --["shdict_expire"]       = 60,   -- in s
+    ["shdict_expire"]       = tonumber(ngx.var.shdict_expire or 120)
+}
+
 
 return _M

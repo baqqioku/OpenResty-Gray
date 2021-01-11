@@ -1,6 +1,11 @@
 local modulename = "abtestingInit"
 local _M = {}
 
+local globalConfig = require('config.appConf')
+local redisConf = globalConfig.redisConf
+local divConf = globalConfig.divConf
+
+
 _M._VERSION = '0.0.1'
 
 --[[_M.redisConf = {
@@ -15,14 +20,14 @@ _M._VERSION = '0.0.1'
 }]]
 
 _M.redisConf = {
-    --["uds"]      = '/tmp/redis.sock',
-    ["host"]     = '172.18.5.110',
-    ["port"]     = '6379',
-    ["poolsize"] = 20000,
-    ["idletime"] = 90000 ,
-    ["timeout"]  = 3000,
-    ["dbid"]     = 0,
-    ["auth"]     = 'Yq0wHk5AmlpJ0lEleO5zsMNN6npXOQ'
+    --["uds"]      = redisConf.uds,
+    ["host"]     = redisConf.host,
+    ["port"]     = redisConf.port,
+    ["poolsize"] = redisConf.poolsize,
+    ["idletime"] = redisConf.idletime ,
+    ["timeout"]  = redisConf.timeout,
+    ["dbid"]     = redisConf.dbid,
+    ["auth"]     = redisConf.auth
 }
 
 _M.divtypes = {
@@ -57,9 +62,9 @@ _M.prefixConf = {
 }
 
 _M.divConf = {
-    ["default_backend"]     = ngx.var.default_backend,
+    ["default_backend"]     = divConf.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = tonumber(ngx.var.shdict_expire or 120)
+    ["shdict_expire"]       = divConf.shdict_expire
 }
 
 _M.cacheConf = {
