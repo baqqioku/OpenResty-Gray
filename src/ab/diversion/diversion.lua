@@ -161,7 +161,7 @@ local loadGrayServer = function()
         -- continue, then fetch from db
     elseif graySwitch == 'off' then
         -- graySwitch = 0, div switch off, goto default upstream
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return false, graySwitch,'graySwitch == off, div switch off'
     else
         return true,graySwitch
@@ -170,7 +170,7 @@ local loadGrayServer = function()
     -- step 4: fetch from redis
     local ok, db = connectdb(red, redisConf)
     if not ok then
-        --if sem then sema:post(1) end
+        if sem then sema:post(1) end
         return ok, db
     end
 
@@ -203,7 +203,7 @@ local pfunc = function()
     if not divEnable then
         return false,-1,nil
     end
-    --[[
+
     local ok,status, graySwitch = xpcall(loadGrayServer,handler)
     --ngx.log(ngx.DEBUG,"  ",ok,"  ",status,"  ",graySwitch)
 
@@ -219,10 +219,7 @@ local pfunc = function()
             return false,-1,nil
         end
     end
-   ]]
-    --[[    if  not status and graySwitch == 'off' then
-            return false,-1,nil
-        end]]
+
 
     local runtimeCache  = cache:new(ngx.var.sysConfig)
     --step 1: read frome cache, but error

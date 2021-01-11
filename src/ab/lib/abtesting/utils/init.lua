@@ -59,7 +59,7 @@ _M.prefixConf = {
 _M.divConf = {
     ["default_backend"]     = ngx.var.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = 0--tonumber(ngx.var.shdict_expire or 60)
+    ["shdict_expire"]       = tonumber(ngx.var.shdict_expire or 60)
 }
 
 _M.cacheConf = {

@@ -22,24 +22,5 @@ _M.global_configs = {
 
 }
 
--- 局部灰度开关配置
-_M.graySwith = {
-    ["dirver"]  = "on",
-    ["carlife"] = "off"
-}
-
-_M.redisConf = {
-    ["uds"]      = '/var/run/redis.sock',
-    ["host"]     = '192.168.126.130',
-    ["port"]     = '6379',
-    ["poolsize"] = 10000,
-    ["idletime"] = 90000 ,
-    ["timeout"]  = 10000,
-    ["dbid"]     = 0,
-    ["auth"]     = '123'
-}
-
-
-
 
 return _M
