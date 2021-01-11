@@ -474,4 +474,4 @@ end
 
 
 local info = doredirect(desc)
-log:info(info)
+log:debug(info)
