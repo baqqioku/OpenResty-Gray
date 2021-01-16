@@ -16,6 +16,8 @@ local divConf       = systemConf.divConf
 local shdict_expire = divConf.shdict_expire
 local separator = ":"
 
+local defaultNull = -1;
+
 _M.new = function(self, sharedDict)
     if not sharedDict then
         error{ERRORINFO.ARG_BLANK_ERROR, 'cache name valid from nginx.conf'}
@@ -129,12 +131,13 @@ _M.getUpstream = function(self,hostname, divsteps, usertable)
         ngx.log(ngx.DEBUG,"获取实际的upstream 键值: ",info)
         --info 获取到了实际的 uid 值
         -- ups will be an actually value or nil
-        if info then
+        if info and info ~= defaultNull then
             local key = hostname..separator..info
             ngx.log(ngx.DEBUG,"获取拼接后的 upstream 键值: ",key)
             local ups   = cache:get(key)
             upstable[idx] = ups
-
+        elseif info == defaultNull then
+            upstable[idx] = defaultNull
         end
     end
     return upstable
