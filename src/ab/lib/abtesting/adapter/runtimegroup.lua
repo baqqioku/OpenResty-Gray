@@ -170,6 +170,7 @@ _M.del = function(self, domain)
     local prefix = baseLibrary .. ':' .. domain
 
     local divStep = prefix .. ':' .. fields.divsteps
+    local status = prefix .. ':' .. fields.status
     ngx.log(ngx.DEBUG," del divStep:"..divStep)
     local ok, err = database:get(divStep)
     if not ok then error{ERRORINFO.REDIS_ERROR, err} end
@@ -189,7 +190,8 @@ _M.del = function(self, domain)
     end
 
     local ok, err = database:del(divStep)
-    if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+    local ok1,err = database:del(status)
+    if not ok and not ok1 then error{ERRORINFO.REDIS_ERROR, err} end
 end
 
 _M.list = function(self)
