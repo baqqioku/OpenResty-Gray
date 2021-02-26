@@ -367,7 +367,7 @@ local upPfunc = function()
         if ups == -1 then
 			if i == divsteps then
 				local info = "usertable has no upstream in cache 1, proxypass to default upstream"
-				log:info(info)
+				log:debug(info)
 				return nil, info
 			end
             -- continue
@@ -386,7 +386,7 @@ local upPfunc = function()
             break
         else
 			local info = "get upstream ["..ups.."] according to [" ..idx.."] userinfo ["..usertable[idx].."] in cache 1"
-			log:info(info)
+			log:debug(info)
             return ups, info
         end
     end
@@ -476,4 +476,4 @@ end
 
 
 local info = doredirect(desc)
-log:debug(info)
+log:info(info)
