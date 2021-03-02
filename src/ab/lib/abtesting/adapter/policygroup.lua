@@ -196,11 +196,11 @@ _M.del = function(self, id)
     end
 
     database:init_pipeline()
-    for _, v in pairs(tmpkeys) do
+--[[    for _, v in pairs(tmpkeys) do
         for _, vv in pairs(v) do
             database:del(vv)
         end
-    end
+    end]]
     database:del(groupKey)
 
     local ok, err = database:commit_pipeline()
