@@ -339,7 +339,7 @@ local upPfunc = function()
         local info = getUserInfo(runtime) --获取 实际的 id 策略lua解析器 如  abtesting.userinfo.uidParser 在调用get 方法获取解析参数
 
         if info then
-            log:debug('获取路由解析参数: ', cjson.encode(info))
+            log:info('获取路由解析参数: ', cjson.encode(info))
 
         end
 
