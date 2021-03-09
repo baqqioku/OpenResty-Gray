@@ -120,6 +120,30 @@ _M.setRuntime = function(self, hostname, divsteps,status, runtimegroup)
     return true
 end
 
+_M.delRuntime = function(self,hostname,divsteps)
+    local cache = self.cache
+    local prefix = runtimeLib .. ':' .. hostname
+    for i = 1, divsteps do
+        local idx = indices[i]
+
+        local k_divModname      = prefix .. ':'..idx..':'..fields.divModulename
+        local k_divDataKey      = prefix .. ':'..idx..':'..fields.divDataKey
+        local k_userInfoModname = prefix .. ':'..idx..':'..fields.userInfoModulename
+
+        local ok1, err = cache:delete(k_divModname)
+        local ok2, err = cache:delete(k_divDataKey)
+        local ok3, err = cache:delete(k_userInfoModname)
+        if areNULL(ok1, ok2, ok3) then return false end
+
+    end
+
+    local k_divsteps = prefix ..':'..fields.divsteps
+    local k_status   = prefix ..':'..fields.status
+    local ok, err = cache:delete(k_divsteps)
+    local ok1, err = cache:delete(k_status)
+    if not ok and not ok1 then return false end
+end
+
 _M.getUpstream = function(self,hostname, divsteps, usertable)
     local upstable = {}
     local cache = self.cache

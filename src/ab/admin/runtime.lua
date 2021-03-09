@@ -225,6 +225,7 @@ _M.runtimeset = function(option, policyId)
         local statusKey           = runtimeLib .. ':' .. hostname .. ':' .. fields.status
         local ok, err = database:set(divSteps, divsteps)
         local ok1,err = database:set(statusKey,1)
+
         if not ok or not ok1 then error{ERRORINFO.REDIS_ERROR, err} end
     end
 
