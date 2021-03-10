@@ -24,13 +24,13 @@ _M.global_configs = {
 
 _M.redisConf = {
     --["uds"]      = '/tmp/redis.sock',
-    ["host"]     = '172.18.5.110',
+    ["host"]     = '172.19.70.15',
     ["port"]     = '6379',
     ["poolsize"] = 20000,
     ["idletime"] = 90000 ,
     ["timeout"]  = 3000,
     ["dbid"]     = 0,
-    ["auth"]     = 'Yq0wHk5AmlpJ0lEleO5zsMNN6npXOQ'
+    ["auth"]     = 'VXTOrgIcDCFCy9MGz_qtyEtQh2sKYu'
 }
 
 
