@@ -196,13 +196,13 @@ _M.del = function(self, id)
     end
 
     database:init_pipeline()
-    for _, v in pairs(tmpkeys) do
+--[[    for _, v in pairs(tmpkeys) do
         for _, vv in pairs(v) do
             database:del(vv)
         end
-    end
-    database:del(groupKey)
+    end]]
 
+    database:del(groupKey)
     local ok, err = database:commit_pipeline()
     if not ok then error{ERRORINFO.REDIS_ERROR, err} end
 end
