@@ -8,17 +8,17 @@ local divConf = globalConfig.divConf
 
 _M._VERSION = '0.0.1'
 
---[[_M.redisConf = {
-    ["uds"]      = ngx.var.redis_uds,
+_M.redisConf = {
+    --["uds"]      = ngx.var.redis_uds,
     ["host"]     = ngx.var.redis_host,
     ["port"]     = ngx.var.redis_port,
     ["poolsize"] = ngx.var.redis_pool_size,
-    ["idletime"] = ngx.var.redis_keepalive_timeout , 
+    ["idletime"] = ngx.var.redis_idletime ,
     ["timeout"]  = ngx.var.redis_connect_timeout,
     ["dbid"]     = ngx.var.redis_dbid,
     ["auth"]     = ngx.var.redis_auth
-}]]
-
+}
+--[[
 _M.redisConf = {
     --["uds"]      = redisConf.uds,
     ["host"]     = redisConf.host,
@@ -28,7 +28,7 @@ _M.redisConf = {
     ["timeout"]  = redisConf.timeout,
     ["dbid"]     = redisConf.dbid,
     ["auth"]     = redisConf.auth
-}
+}]]
 
 _M.divtypes = {
     ["iprange"]     = 'ipParser',  
