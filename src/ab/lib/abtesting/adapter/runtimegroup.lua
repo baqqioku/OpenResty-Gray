@@ -100,9 +100,11 @@ _M.set = function(self, domain, policyGroupId, divsteps)
     
     local divStep = prefix .. ':' .. fields.divsteps
     local statusKey = prefix..separator..fields.status
+    local groupKey = prefix..separator..fields.group
     local ok,err  = database:set(divStep, divsteps)
     local ok1,err = database:set(statusKey,1)
-    if not ok or not ok1 then  error{ERRORINFO.REDIS_ERROR, err} end
+    local ok2,err = database:set(groupkey,policyGroupId)
+    if not ok or not ok1 or not ok2 then  error{ERRORINFO.REDIS_ERROR, err} end
 
     return ERRORINFO.SUCCESS
 end
@@ -131,12 +133,24 @@ _M.get = function(self, domain)
     end
 
     local status = prefix .. ':' .. fields.status
+    local singleKey = prefix .. ':' .. fields.single
+    local groupKey =  prefix .. ':' .. fields.group
     ngx.log(ngx.DEBUG,status..'  ',domain)
     local ok, err = database:get(status)
-    if not ok then
+    local ok1, err = database:get(singleKey)
+    local ok2,err = database:get(groupKey)
+    if not ok or not ok1 or not ok2 then
         error{ERRORINFO.REDIS_ERROR, err}
     elseif ok == ngx.null then
         ok = 1
+    end
+
+    if ok1 == ngx.null then
+        ok1 = ''
+    end
+
+    if ok2 == ngx.null then
+        ok2 = ''
     end
 
     local runtimeStatus = tonumber(ok)
@@ -156,6 +170,8 @@ _M.get = function(self, domain)
     ret.status = runtimeStatus
     ret.divsteps = divsteps
     ret.runtimegroup = runtimeGroup
+    ret.single = ok1
+    ret.group = ok2
     return ret
 
 end
@@ -171,6 +187,8 @@ _M.del = function(self, domain)
 
     local divStep = prefix .. ':' .. fields.divsteps
     local status = prefix .. ':' .. fields.status
+    local singleKey = prefix .. ':' .. fields.single
+    local groupKey = prefix .. ':' .. fields.group
     ngx.log(ngx.DEBUG," del divStep:"..divStep)
     local ok, err = database:get(divStep)
     if not ok then error{ERRORINFO.REDIS_ERROR, err} end
@@ -191,7 +209,9 @@ _M.del = function(self, domain)
 
     local ok, err = database:del(divStep)
     local ok1,err = database:del(status)
-    if not ok and not ok1 then error{ERRORINFO.REDIS_ERROR, err} end
+    local ok2,err = database:del(singleKey)
+    local ok3,err = database:del(groupKey)
+    if not ok and not ok1 and not ok2 and not ok3 then error{ERRORINFO.REDIS_ERROR, err} end
 end
 
 _M.list = function(self)
@@ -221,7 +241,6 @@ _M.list = function(self)
 
     local divStepList = {}
     local realDomainList = {}
-    local prefixStatusKey = baseLibrary
     if #domainList >0 then
         for k,v in ipairs(domainList) do
             local str = utils.split(v,":")
