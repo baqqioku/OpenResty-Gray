@@ -138,6 +138,48 @@ _M.set = function(option)
     end
 end
 
+_M.update = function(option)
+
+    local db = option.db
+    local database = db.redis
+    local policyId = getPolicyId()
+    local policyGroupId = getPolicyGroupId()
+    local preHostName = ngx.var.arg_prehostname
+
+    if not preHostName or string.len(preHostName) < 1 or preHostName == ngx.null then
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = 'arg preHostName invalid: '
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    local pfunc = function()
+        local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
+        return runtimeGroupMod:del(preHostName)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    if policyId and policyId >= 0 then
+        _M.runtimeset(option, policyId)
+    elseif policyGroupId and policyGroupId >= 0 then
+        _M.groupset(option, policyGroupId)
+    else
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = "policyId or policyGroupid invalid"
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+end
+
 --- 根据请求提供的运行数据，编辑新的运行时信息
 --- 可以使用策略id，也可以使用策略组id
 --- 策略id优先

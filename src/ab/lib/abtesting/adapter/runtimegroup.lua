@@ -103,7 +103,7 @@ _M.set = function(self, domain, policyGroupId, divsteps)
     local groupKey = prefix..separator..fields.group
     local ok,err  = database:set(divStep, divsteps)
     local ok1,err = database:set(statusKey,1)
-    local ok2,err = database:set(groupkey,policyGroupId)
+    local ok2,err = database:set(groupKey,policyGroupId)
     if not ok or not ok1 or not ok2 then  error{ERRORINFO.REDIS_ERROR, err} end
 
     return ERRORINFO.SUCCESS
@@ -326,10 +326,13 @@ _M.pageList = function(self,page,size)
     for k,v in ipairs(allRuntime) do
         local strList = utils.split(v,":")
         local prefixStatusKey  = baseLibrary..separator..strList[3]..separator..fields.status
-        ngx.log(ngx.DEBUG,prefixStatusKey,'xxxx--',v)
+        local prefixSingleKey  = baseLibrary..separator..strList[3]..separator..fields.single
+        local prefixGroupKey  = baseLibrary..separator..strList[3]..separator..fields.group
+
+        ngx.log(ngx.DEBUG,v)
         if #strList>4 then
             -- continue
-        elseif prefixStatusKey == v then
+        elseif prefixStatusKey == v or prefixSingleKey==v or prefixGroupKey == v then
             --continue
         else
             domainList[i] = v
@@ -371,6 +374,7 @@ _M.pageList = function(self,page,size)
         local policys = {}
         for i = 1, divSteps do
             local idx = indices[i]
+
             local divModulenameKey      = table.concat({prefix, idx, fields.divModulename}, separator)
             local divDataKey = table.concat({prefix, idx, fields.divDataKey}, separator)
             local ok,err = database:get(divModulenameKey)
