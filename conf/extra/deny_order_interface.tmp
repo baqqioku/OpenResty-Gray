@@ -1,0 +1,8 @@
+        location =/carOrder/expreserve/dispatch/reserveOrder {
+            #设置content type
+            default_type application/json ;
+            add_header Content-Type 'application/json;charset=UTF-8';
+            # HTTP Status Code 和 内容
+            return 200  '{"token":null,"imei":null,"softVersion":null,"sysVersion":null,"platform":null,"channel":null,"deviceId":null,"url":"/carOrder/expreserve/dispatch/reserveOrder","code":-200,"msg":"系统维护中,暂时无法下单","data":null,"createTime":0}';
+        }
+
