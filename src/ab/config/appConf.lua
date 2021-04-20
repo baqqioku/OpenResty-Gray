@@ -24,7 +24,7 @@ _M.global_configs = {
 
 _M.redisConf = {
     --["uds"]      = '/tmp/redis.sock',
-    ["host"]     = '172.18.5.110',
+    ["host"]     = '172.18.4.28',
     ["port"]     = '6379',
     ["poolsize"] = 20000,
     ["idletime"] = 90000 ,

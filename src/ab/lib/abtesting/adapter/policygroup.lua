@@ -201,8 +201,8 @@ _M.del = function(self, id)
             database:del(vv)
         end
     end]]
-
     database:del(groupKey)
+
     local ok, err = database:commit_pipeline()
     if not ok then error{ERRORINFO.REDIS_ERROR, err} end
 end

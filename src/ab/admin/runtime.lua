@@ -81,6 +81,8 @@ _M.get = function(option)
     return true
 end
 
+
+
 _M.del = function(option)
     local db = option.db
     local database = db.redis
@@ -134,6 +136,87 @@ _M.set = function(option)
         ngx.say(response)
         return nil
     end
+end
+
+_M.update = function(option)
+
+    local db = option.db
+    local database = db.redis
+    local policyId = getPolicyId()
+    local policyGroupId = getPolicyGroupId()
+    local preHostName = ngx.var.arg_prehostname
+
+    if not preHostName or string.len(preHostName) < 1 or preHostName == ngx.null then
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = 'arg preHostName invalid: '
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    local pfunc = function()
+        local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
+        return runtimeGroupMod:del(preHostName)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    if policyId and policyId >= 0 then
+        _M.runtimeset(option, policyId)
+    elseif policyGroupId and policyGroupId >= 0 then
+        _M.groupset(option, policyGroupId)
+    else
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = "policyId or policyGroupid invalid"
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+end
+
+--- 根据请求提供的运行数据，编辑新的运行时信息
+--- 可以使用策略id，也可以使用策略组id
+--- 策略id优先
+--- 策略id对应runtime，策略组id对应runtimegroup
+_M.admin_get = function(option)
+    local db = option.db
+    local database = db.redis
+
+    local hostname = getHostName()
+    if not hostname or string.len(hostname) < 1 or hostname == ngx.null then
+        local info = ERRORINFO.PARAMETER_TYPE_ERROR
+        local desc = 'arg hostname invalid: '
+        local response = doresp(info, desc)
+        log:errlog(dolog(info, desc))
+        ngx.say(response)
+        return nil
+    end
+
+    local pfunc = function()
+        local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
+        return runtimeGroupMod:get(hostname)
+    end
+    local status, info = xpcall(pfunc, handler)
+    if not status then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    end
+
+    local runtimeInfo = {}
+    runtimeInfo.status = info.status
+    runtimeInfo.single = info.single
+    runtimeInfo.group = info.group
+    runtimeInfo.divsteps = info.divsteps
+    local response = doresp(ERRORINFO.SUCCESS, nil, runtimeInfo)
+    ngx.say(response)
+    return true
 end
 
 
@@ -222,10 +305,13 @@ _M.runtimeset = function(option, policyId)
         runtimeMod:set(prefix, divModulename, divDataKey, userInfoModulename)
 
         local divSteps           = runtimeLib .. ':' .. hostname .. ':' .. fields.divsteps
-        local statusKey           = runtimeLib .. ':' .. hostname .. ':' .. fields.status
+        local statusKey          = runtimeLib .. ':' .. hostname .. ':' .. fields.status
+        local hostRelation       = runtimeLib .. ':' .. hostname .. ':' .. fields.single;
         local ok, err = database:set(divSteps, divsteps)
         local ok1,err = database:set(statusKey,1)
-        if not ok or not ok1 then error{ERRORINFO.REDIS_ERROR, err} end
+        local ok2,err = database:set(hostRelation,policyId)
+
+        if not ok or not ok1 or not ok2 then error{ERRORINFO.REDIS_ERROR, err} end
     end
 
     local status, info = xpcall(pfunc, handler)
