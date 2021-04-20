@@ -227,7 +227,7 @@ local pfunc = function()
     local runtimeStatus   = runtimeCache:getStatus(hostname)
     if not divsteps or not runtimeStatus then
         -- continue, then fetch from db
-    elseif divsteps < 1 or runtimeStatus ==0 then
+    elseif divsteps < 1 or runtimeStatus == 0 then
         -- divsteps = 0   , div switch off, goto default upstream
         return false, 'status == 0,divsteps < 1, div switchoff'
     else
