@@ -155,9 +155,29 @@ _M.update = function(option)
         return nil
     end
 
+    local statusPfunc = function()
+        local statusKey           = runtimeLib .. ':' .. preHostName .. ':' .. fields.status
+        local status, err = database:get(statusKey)
+        if not status then error{ERRORINFO.REDIS_ERROR, err} end
+        return status;
+    end
+
+    local ok, info = xpcall(statusPfunc, handler)
+    if not ok then
+        local response = doerror(info)
+        ngx.say(response)
+        return false
+    elseif info == ngx.null then
+        --如果没有给他一个状态
+        info = 1
+    end
+    ngx.log(ngx.DEBUG,'状态:'..info)
+    option.status = info
+
+
     local pfunc = function()
         local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
-        return runtimeGroupMod:del(preHostName)
+        return runtimeGroupMod:updateDel(preHostName)
     end
     local status, info = xpcall(pfunc, handler)
     if not status then
@@ -227,6 +247,7 @@ _M.groupset = function(option, policyGroupId)
 
     local hostname = getHostName()
     local divsteps = getDivSteps()
+    local preStatus = option.status
 
     if not hostname or string.len(hostname) < 1 or hostname == ngx.null then
         local info = ERRORINFO.PARAMETER_TYPE_ERROR 
@@ -240,7 +261,7 @@ _M.groupset = function(option, policyGroupId)
     local pfunc = function()
         local runtimeGroupMod = runtimeGroupModule:new(database, runtimeLib)
         runtimeGroupMod:del(hostname)
-        return runtimeGroupMod:set(hostname, policyGroupId, divsteps)
+        return runtimeGroupMod:set(hostname, policyGroupId, divsteps,preStatus)
     end
     local status, info = xpcall(pfunc, handler)
     if not status then
@@ -258,6 +279,7 @@ end
 _M.runtimeset = function(option, policyId)
     local db = option.db
     local database = db.redis
+    local preStatus = option.status
 
     local hostname = getHostName()
     local divsteps = 1
@@ -308,11 +330,19 @@ _M.runtimeset = function(option, policyId)
         local statusKey          = runtimeLib .. ':' .. hostname .. ':' .. fields.status
         local hostRelation       = runtimeLib .. ':' .. hostname .. ':' .. fields.single;
         local ok, err = database:set(divSteps, divsteps)
-        local ok1,err = database:set(statusKey,1)
-        local ok2,err = database:set(hostRelation,policyId)
 
-        if not ok or not ok1 or not ok2 then error{ERRORINFO.REDIS_ERROR, err} end
-    end
+        --是为了兼容更新操作
+
+        if preStatus then
+            local ok1,err = database:set(statusKey,preStatus)
+        else
+            local ok1,err = database:set(statusKey,1)
+        end
+
+        local ok2,err = database:set(hostRelation,policyId)
+        if   not ok2 then error{ERRORINFO.REDIS_ERROR, err} end
+
+     end
 
     local status, info = xpcall(pfunc, handler)
     if not status then

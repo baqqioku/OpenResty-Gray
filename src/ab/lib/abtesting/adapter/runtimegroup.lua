@@ -51,7 +51,7 @@ end
 -- @param domain is a domain name to search runtime info
 -- @param ... now is diversion modulename and diversion data key
 -- @return if returned, the return value always SUCCESS
-_M.set = function(self, domain, policyGroupId, divsteps)
+_M.set = function(self, domain, policyGroupId, divsteps,preStatus)
     local database = self.database
     local baseLibrary = self.baseLibrary
     local prefix = baseLibrary .. ':' .. domain
@@ -102,9 +102,13 @@ _M.set = function(self, domain, policyGroupId, divsteps)
     local statusKey = prefix..separator..fields.status
     local groupKey = prefix..separator..fields.group
     local ok,err  = database:set(divStep, divsteps)
-    local ok1,err = database:set(statusKey,1)
+    if preStatus then
+        local ok1,err = database:set(statusKey,preStatus)
+    else
+        local ok1,err = database:set(statusKey,1)
+    end
     local ok2,err = database:set(groupKey,policyGroupId)
-    if not ok or not ok1 or not ok2 then  error{ERRORINFO.REDIS_ERROR, err} end
+    if not ok or  not ok2 then  error{ERRORINFO.REDIS_ERROR, err} end
 
     return ERRORINFO.SUCCESS
 end
@@ -213,6 +217,41 @@ _M.del = function(self, domain)
     local ok3,err = database:del(groupKey)
     if not ok and not ok1 and not ok2 and not ok3 then error{ERRORINFO.REDIS_ERROR, err} end
 end
+
+_M.updateDel = function(self, domain)
+    local database = self.database
+    local baseLibrary = self.baseLibrary
+    local prefix = baseLibrary .. ':' .. domain
+
+    local divStep = prefix .. ':' .. fields.divsteps
+    local status = prefix .. ':' .. fields.status
+    local singleKey = prefix .. ':' .. fields.single
+    local groupKey = prefix .. ':' .. fields.group
+    ngx.log(ngx.DEBUG," del divStep:"..divStep)
+    local ok, err = database:get(divStep)
+    if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+
+    local divsteps = tonumber(ok)
+    if not divsteps or divsteps == ngx.null or divsteps == null then
+        local ok, err = database:del(divStep)
+        if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+        return nil
+    end
+
+    for i = 1, divsteps do
+        local idx = indices[i]
+        local runtimeMod =  runtimeModule:new(database, prefix)
+        local ok, err = runtimeMod:del(idx)
+        if not ok then error{ERRORINFO.REDIS_ERROR, err} end
+    end
+
+    local ok, err = database:del(divStep)
+    local ok1,err = database:del(status)
+    local ok2,err = database:del(singleKey)
+    local ok3,err = database:del(groupKey)
+    if not ok and not ok1  and not ok2 and not ok3 then error{ERRORINFO.REDIS_ERROR, err} end
+end
+
 
 _M.list = function(self)
     local database = self.database
