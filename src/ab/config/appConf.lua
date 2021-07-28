@@ -34,7 +34,7 @@ _M.redisConf = {
 }
 
 
-_M.divConf = {
+_M.global_divConf = {
     ["default_backend"]     = ngx.var.default_backend,
     --["shdict_expire"]       = 60,   -- in s
     ["shdict_expire"]       = tonumber(ngx.var.shdict_expire or 120)

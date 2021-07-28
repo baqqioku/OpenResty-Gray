@@ -3,7 +3,7 @@ local _M = {}
 
 local globalConfig = require('config.appConf')
 local redisConf = globalConfig.redisConf
-local divConf = globalConfig.divConf
+local globalConfigs = globalConfig.global_configs
 
 
 _M._VERSION = '0.0.1'
@@ -62,9 +62,9 @@ _M.prefixConf = {
 }
 
 _M.divConf = {
-    ["default_backend"]     = divConf.default_backend,
+    ["default_backend"]     = globalConfigs.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = divConf.shdict_expire
+    ["shdict_expire"]       = globalConfigs.shdict_expire
 }
 
 _M.cacheConf = {
@@ -92,7 +92,7 @@ _M.fields = {
     ['group']               = 'group'
 }
 
-_M.loglv = {
+_M.log = {
 
     ['err']					= ngx.ERR, 
 	['info']				= ngx.INFO,
