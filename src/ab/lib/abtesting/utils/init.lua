@@ -3,7 +3,7 @@ local _M = {}
 
 local globalConfig = require('config.appConf')
 local redisConf = globalConfig.redisConf
-local globalConfigs = globalConfig.global_configs
+local globalDiv = globalConfig.global_divConf
 
 
 _M._VERSION = '0.0.1'
@@ -62,9 +62,9 @@ _M.prefixConf = {
 }
 
 _M.divConf = {
-    ["default_backend"]     = globalConfigs.default_backend,
+    ["default_backend"]     = globalDiv.default_backend,
     --["shdict_expire"]       = 60,   -- in s
-    ["shdict_expire"]       = globalConfigs.shdict_expire
+    ["shdict_expire"]       = 60 --globalDiv.shdict_expire
 }
 
 _M.cacheConf = {
