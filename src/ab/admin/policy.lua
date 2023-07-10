@@ -326,6 +326,7 @@ _M.pageList = function(option)
     local db = option.db
     local page = ngx.var.arg_page
     local size = ngx.var.arg_size
+    --log.info("============"..page.."============="..size)
     local pfunc = function()
         local policyIO = policyModule:new(db.redis, policyLib)
         return policyIO:pageList(page,size)

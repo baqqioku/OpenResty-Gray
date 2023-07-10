@@ -22,15 +22,19 @@ _M.global_configs = {
 
 }
 
+_M.jwtConfig = {
+    ["secret"] = "@#fd*sa%fagfdgv43532ju76jM"
+}
+
 _M.redisConf = {
     --["uds"]      = '/tmp/redis.sock',
-    ["host"]     = '172.19.70.15',
+    ["host"]     = '192.168.126.130',
     ["port"]     = '6379',
     ["poolsize"] = 20000,
     ["idletime"] = 90000 ,
     ["timeout"]  = 3000,
     ["dbid"]     = 0,
-    ["auth"]     = 'VXTOrgIcDCFCy9MGz_qtyEtQh2sKYu'
+    ["auth"]     = '123'
 }
 
 
